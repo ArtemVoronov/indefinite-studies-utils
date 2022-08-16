@@ -5,7 +5,7 @@ import (
 
 	"fmt"
 
-	"github.com/ArtemVoronov/indefinite-studies-utils/internal/utils"
+	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
