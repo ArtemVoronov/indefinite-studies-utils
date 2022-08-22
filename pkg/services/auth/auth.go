@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-type Service struct {
+type AuthService struct {
 	client         *http.Client
 	baseURL        string
 	verifyTokenURL string
@@ -23,15 +23,15 @@ type VerificationResult struct {
 	IsExpired bool
 }
 
-func CreateAuthService(client *http.Client, baseUrl string) *Service {
-	return &Service{
+func CreateAuthService(client *http.Client, baseUrl string) *AuthService {
+	return &AuthService{
 		client:         client,
 		baseURL:        baseUrl,
 		verifyTokenURL: baseUrl + "/api/v1/auth/verify-token",
 	}
 }
 
-func (s *Service) VerifyToken(token string) (*VerificationResult, error) {
+func (s *AuthService) VerifyToken(token string) (*VerificationResult, error) {
 	var result *VerificationResult
 
 	body, err := json.Marshal(VerificationDTO{AccessToken: token})

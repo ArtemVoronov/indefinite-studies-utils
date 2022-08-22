@@ -13,7 +13,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type Service struct {
+type PostgreSQLService struct {
 	client       *sql.DB
 	queryTimeout time.Duration
 }
@@ -22,14 +22,14 @@ type SqlQueryFunc func(transaction *sql.Tx, ctx context.Context, cancel context.
 
 type SqlQueryFuncVoid func(transaction *sql.Tx, ctx context.Context, cancel context.CancelFunc) error
 
-func CreateSQLDBService(client *http.Client, baseUrl string) *Service {
-	return &Service{
+func CreatePostgreSQLService(client *http.Client, baseUrl string) *PostgreSQLService {
+	return &PostgreSQLService{
 		client:       createClient(),
 		queryTimeout: queryTimeout(),
 	}
 }
 
-func (s *Service) Tx(f SqlQueryFunc) func() (any, error) {
+func (s *PostgreSQLService) Tx(f SqlQueryFunc) func() (any, error) {
 	database := s.client
 	timeout := s.queryTimeout
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
@@ -52,7 +52,7 @@ func (s *Service) Tx(f SqlQueryFunc) func() (any, error) {
 	}
 }
 
-func (s *Service) TxVoid(f SqlQueryFuncVoid) func() error {
+func (s *PostgreSQLService) TxVoid(f SqlQueryFuncVoid) func() error {
 	database := s.client
 	timeout := s.queryTimeout
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
