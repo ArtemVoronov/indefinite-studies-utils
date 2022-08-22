@@ -28,6 +28,10 @@ func CreatePostgreSQLService() *PostgreSQLService {
 	}
 }
 
+func (s *PostgreSQLService) Shutdown() error {
+	return s.client.Close()
+}
+
 func (s *PostgreSQLService) Tx(f SqlQueryFunc) func() (any, error) {
 	database := s.client
 	timeout := s.queryTimeout

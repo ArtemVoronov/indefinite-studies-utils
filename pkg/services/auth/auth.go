@@ -31,6 +31,10 @@ func CreateAuthService(client *http.Client, baseUrl string) *AuthService {
 	}
 }
 
+func (s *AuthService) Shutdown() error {
+	return nil
+}
+
 func (s *AuthService) VerifyToken(token string) (*VerificationResult, error) {
 	var result *VerificationResult
 
