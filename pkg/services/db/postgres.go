@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"net/http"
 	"strconv"
 	"time"
 
@@ -22,7 +21,7 @@ type SqlQueryFunc func(transaction *sql.Tx, ctx context.Context, cancel context.
 
 type SqlQueryFuncVoid func(transaction *sql.Tx, ctx context.Context, cancel context.CancelFunc) error
 
-func CreatePostgreSQLService(client *http.Client, baseUrl string) *PostgreSQLService {
+func CreatePostgreSQLService() *PostgreSQLService {
 	return &PostgreSQLService{
 		client:       createClient(),
 		queryTimeout: queryTimeout(),
