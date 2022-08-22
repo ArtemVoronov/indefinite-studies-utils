@@ -14,7 +14,7 @@ type ApiError struct {
 	Msg   string
 }
 
-func GetValidationMessageForTag(tag string) string {
+func message(tag string) string {
 	switch tag {
 	case "required":
 		return "This field is required"
@@ -32,12 +32,12 @@ func GetValidationMessageForTag(tag string) string {
 	return ""
 }
 
-func ProcessAndSendValidationErrorMessage(c *gin.Context, err error) {
+func SendError(c *gin.Context, err error) {
 	var ve validator.ValidationErrors
 	if errors.As(err, &ve) {
 		out := make([]ApiError, len(ve))
 		for i, fe := range ve {
-			out[i] = ApiError{fe.Field(), GetValidationMessageForTag(fe.Tag())}
+			out[i] = ApiError{fe.Field(), message(fe.Tag())}
 		}
 		c.JSON(http.StatusBadRequest, gin.H{"errors": out})
 		return
