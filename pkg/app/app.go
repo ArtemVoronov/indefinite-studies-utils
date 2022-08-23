@@ -19,6 +19,7 @@ type FuncSetup func()
 type FuncShutdown func()
 
 func Start(setup FuncSetup, shutdown FuncShutdown, host string, router *gin.Engine) {
+	LoadEnv()
 	setup()
 	defer shutdown()
 	srv := &http.Server{
