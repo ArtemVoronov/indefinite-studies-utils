@@ -56,9 +56,33 @@ func EnvVarInt(varName string) int {
 	return result
 }
 
+func EnvVarIntDefault(varName string, defaultValue int) int {
+	val, valExists := os.LookupEnv(varName)
+	if !valExists {
+		return defaultValue
+	}
+	result, err := strconv.Atoi(val)
+	if err != nil {
+		log.Fatalf("Wrong value of environment variable: %s. It should be integer number", varName)
+	}
+	return result
+}
+
 func EnvVarDuration(varName string, unit time.Duration) time.Duration {
 	val := EnvVarInt(varName)
 	return unit * time.Duration(val)
+}
+
+func EnvVarDurationDefault(varName string, unit time.Duration, defaultValue time.Duration) time.Duration {
+	val, valExists := os.LookupEnv(varName)
+	if !valExists {
+		return defaultValue
+	}
+	number, err := strconv.Atoi(val)
+	if err != nil {
+		log.Fatalf("Wrong value of environment variable: %s. It should be integer number", varName)
+	}
+	return unit * time.Duration(number)
 }
 
 func EnvVarBytes(varName string) []byte {
