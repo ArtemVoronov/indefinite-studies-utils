@@ -74,8 +74,14 @@ func Cors() gin.HandlerFunc {
 	}
 }
 
-func Host() string {
-	port := utils.EnvVarDefault("APP_PORT", "3005")
+func HostHTTP() string {
+	port := utils.EnvVarDefault("APP_HTTP_API_PORT", "3005")
+	host := ":" + port
+	return host
+}
+
+func HostGRPC() string {
+	port := utils.EnvVarDefault("APP_GRPC_API_PORT", "50051")
 	host := ":" + port
 	return host
 }
