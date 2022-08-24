@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -13,12 +14,13 @@ import (
 	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"google.golang.org/grpc"
 )
 
 type FuncSetup func()
 type FuncShutdown func()
 
-func Start(setup FuncSetup, shutdown FuncShutdown, host string, router *gin.Engine) {
+func StartHTTP(setup FuncSetup, shutdown FuncShutdown, host string, router *gin.Engine) {
 	LoadEnv()
 	setup()
 	defer shutdown()
@@ -28,12 +30,12 @@ func Start(setup FuncSetup, shutdown FuncShutdown, host string, router *gin.Engi
 	}
 
 	go func() {
-		log.Printf("App starting at localhost%s ...\n", srv.Addr)
+		log.Printf("http server listening at %v\n", srv.Addr)
 		err := srv.ListenAndServe()
 		if err != nil && errors.Is(err, http.ErrServerClosed) {
-			log.Println("Server was closed")
+			log.Println("http server was closed")
 		} else if err != nil {
-			log.Fatalf("Unable to start app: %v\n", err)
+			log.Fatalf("unable to start http server: %v\n", err)
 		}
 	}()
 
@@ -44,17 +46,17 @@ func Start(setup FuncSetup, shutdown FuncShutdown, host string, router *gin.Engi
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	log.Println("Shutting down server ...")
+	log.Println("shutting down http server ...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), ShutdownTimeout())
 	defer cancel()
 
 	err := srv.Shutdown(ctx)
 	if err != nil {
-		log.Fatal("Server forced to shutdown:", err)
+		log.Fatal("http server forced to shutdown:", err)
 	}
 
-	log.Println("Server has been shutdown")
+	log.Println("http server has been shutdown")
 }
 
 func LoadEnv() {
@@ -84,4 +86,40 @@ func Mode() string {
 
 func ShutdownTimeout() time.Duration {
 	return utils.EnvVarDurationDefault("APP_SHUTDOWN_TIMEOUT_IN_SECONDS", time.Second, 5*time.Second)
+}
+
+type FuncRegisterService func(s *grpc.Server)
+
+func StartGRPC(setup FuncSetup, shutdown FuncShutdown, host string, registerServices FuncRegisterService) {
+	setup()
+	defer shutdown()
+	lis, err := net.Listen("tcp", host)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	grpc := grpc.NewServer() // TODO: add TLS
+
+	registerServices(grpc)
+
+	go func() {
+		log.Printf("grpc server listening at %v", lis.Addr())
+		err := grpc.Serve(lis)
+		if err != nil {
+			log.Fatalf("failed to serve: %v", err)
+		}
+	}()
+
+	quit := make(chan os.Signal)
+	// kill (no param) default send syscall.SIGTERM
+	// kill -2 is syscall.SIGINT
+	// kill -9 is syscall.SIGKILL but can't be caught, so don't need to add it
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	log.Println("grpc server shutting down server ...")
+
+	grpc.GracefulStop()
+
+	log.Println("grpc server has been shutdown")
 }
