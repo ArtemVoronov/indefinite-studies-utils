@@ -116,7 +116,7 @@ func (s *AuthGRPCService) Shutdown() error {
 	return nil
 }
 
-func (s *AuthGRPCService) ValidateCredentials(token string) (*VerificationResult, error) {
+func (s *AuthGRPCService) VerifyToken(token string) (*VerificationResult, error) {
 	var result *VerificationResult
 	if s.connection == nil {
 		err := s.connect()
