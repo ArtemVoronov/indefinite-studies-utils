@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option go_package = "github.com/ArtemVoronov/indefinite-studies-utils/pkg/services/profiles/profiles";
+
+package profiles;
+
+service ProfilesService {
+  rpc ValidateCredentials (ValidateCredentialsRequest) returns (ValidateCredentialsReply) {}
+}
+
+message ValidateCredentialsRequest {
+  string login = 1;
+  string password = 2;
+}
+
+message ValidateCredentialsReply {
+  int32 userId = 1;
+  bool isValid = 2;
+}

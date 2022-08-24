@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option go_package = "github.com/ArtemVoronov/indefinite-studies-utils/pkg/services/auth/auth";
+
+package auth;
+
+service AuthService {
+  rpc VerifyToken (VerifyTokenRequest) returns (VerifyTokenReply) {}
+}
+
+message VerifyTokenRequest {
+  string token = 1;
+}
+
+message VerifyTokenReply {
+  bool isValid = 1;
+  bool isExpired = 2;
+}

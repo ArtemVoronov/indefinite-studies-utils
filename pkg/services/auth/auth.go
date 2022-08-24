@@ -2,10 +2,15 @@ package auth
 
 import (
 	"bytes"
+	context "context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
+
+	grpc "google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type AuthService struct {
@@ -69,6 +74,68 @@ func (s *AuthService) VerifyToken(token string) (*VerificationResult, error) {
 	err = json.Unmarshal(resBody, &result)
 	if err != nil {
 		return result, fmt.Errorf("unable to verify token: %s", err)
+	}
+
+	return result, nil
+}
+
+type AuthGRPCService struct {
+	serverHost   string
+	dialOptions  []grpc.DialOption
+	connection   *grpc.ClientConn
+	client       AuthServiceClient
+	queryTimeout time.Duration
+}
+
+func CreateHelloService(serverHost string) *AuthGRPCService {
+	// TODO: add TLS
+	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	return &AuthGRPCService{
+		serverHost:   serverHost,
+		dialOptions:  opts,
+		queryTimeout: 30 * time.Second,
+	}
+}
+
+func (s *AuthGRPCService) connect() error {
+	conn, err := grpc.Dial(s.serverHost, s.dialOptions...)
+	if err != nil {
+		return fmt.Errorf("unable to connect to '%v', error: %v", s.serverHost, err)
+	}
+	s.connection = conn
+	s.client = NewAuthServiceClient(conn)
+	return nil
+}
+
+func (s *AuthGRPCService) Shutdown() error {
+	if s.connection != nil {
+		return s.connection.Close()
+	}
+	return nil
+}
+
+func (s *AuthGRPCService) ValidateCredentials(token string) (*VerificationResult, error) {
+	var result *VerificationResult
+	if s.connection == nil {
+		err := s.connect()
+		if err != nil {
+			return result, fmt.Errorf("could not greet: %v", err)
+		}
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
+	defer cancel()
+
+	reply, err := s.client.VerifyToken(ctx, &VerifyTokenRequest{Token: token})
+	if err != nil {
+		return result, fmt.Errorf("could not greet: %v", err)
+	}
+
+	result = &VerificationResult{
+		IsValid:   reply.GetIsValid(),
+		IsExpired: reply.GetIsExpired(),
 	}
 
 	return result, nil
