@@ -87,7 +87,7 @@ type AuthGRPCService struct {
 	queryTimeout time.Duration
 }
 
-func CreateHelloService(serverHost string) *AuthGRPCService {
+func CreateAuthGRPCService(serverHost string) *AuthGRPCService {
 	// TODO: add TLS
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))

@@ -22,7 +22,7 @@ type ProfilesGRPCService struct {
 	queryTimeout time.Duration
 }
 
-func CreateHelloService(serverHost string) *ProfilesGRPCService {
+func CreateProfilesGRPCService(serverHost string) *ProfilesGRPCService {
 	// TODO: add TLS
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
