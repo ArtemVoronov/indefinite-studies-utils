@@ -10,6 +10,7 @@ import (
 	"time"
 
 	grpc "google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
@@ -87,10 +88,13 @@ type AuthGRPCService struct {
 	queryTimeout time.Duration
 }
 
-func CreateAuthGRPCService(serverHost string) *AuthGRPCService {
-	// TODO: add TLS
+func CreateAuthGRPCService(serverHost string, creds *credentials.TransportCredentials) *AuthGRPCService {
 	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if creds != nil {
+		opts = append(opts, grpc.WithTransportCredentials(*creds))
+	} else {
+		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	}
 
 	return &AuthGRPCService{
 		serverHost:   serverHost,
