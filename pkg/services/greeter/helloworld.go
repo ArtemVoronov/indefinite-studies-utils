@@ -2,10 +2,7 @@ package greeter
 
 import (
 	context "context"
-	"crypto/tls"
-	"crypto/x509"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"time"
 
@@ -22,46 +19,13 @@ type HelloService struct {
 	queryTimeout time.Duration
 }
 
-func LoadTLSCredentialsForClient(certPath string) (credentials.TransportCredentials, error) {
-	// Load certificate of the CA who signed server's certificate
-	pemServerCA, err := ioutil.ReadFile(certPath)
-	if err != nil {
-		return nil, err
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(pemServerCA) {
-		return nil, fmt.Errorf("failed to add server CA's certificate")
-	}
-
-	// Create the credentials and return it
-	config := &tls.Config{
-		RootCAs: certPool,
-	}
-
-	return credentials.NewTLS(config), nil
-}
-
-func LoadTLSCredentialsForServer(certPath, keyPath string) (credentials.TransportCredentials, error) {
-	// Load server's certificate and private key
-	serverCert, err := tls.LoadX509KeyPair(certPath, keyPath)
-	if err != nil {
-		return nil, err
-	}
-
-	// Create the credentials and return it
-	config := &tls.Config{
-		Certificates: []tls.Certificate{serverCert},
-		ClientAuth:   tls.NoClientCert,
-	}
-
-	return credentials.NewTLS(config), nil
-}
-
-func CreateHelloService(serverHost string) *HelloService {
-	// TODO: add TLS
+func CreateHelloService(serverHost string, creds *credentials.TransportCredentials) *HelloService {
 	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if creds != nil {
+		opts = append(opts, grpc.WithTransportCredentials(*creds))
+	} else {
+		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	}
 
 	return &HelloService{
 		serverHost:   serverHost,

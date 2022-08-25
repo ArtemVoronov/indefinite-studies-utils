@@ -2,7 +2,11 @@ package app
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -15,6 +19,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 type FuncSetup func()
@@ -96,7 +101,7 @@ func ShutdownTimeout() time.Duration {
 
 type FuncRegisterService func(s *grpc.Server)
 
-func StartGRPC(setup FuncSetup, shutdown FuncShutdown, host string, registerServices FuncRegisterService) {
+func StartGRPC(setup FuncSetup, shutdown FuncShutdown, host string, registerServices FuncRegisterService, creds *credentials.TransportCredentials) {
 	setup()
 	defer shutdown()
 	lis, err := net.Listen("tcp", host)
@@ -104,7 +109,12 @@ func StartGRPC(setup FuncSetup, shutdown FuncShutdown, host string, registerServ
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	grpc := grpc.NewServer() // TODO: add TLS
+	var opts []grpc.ServerOption
+	if creds != nil {
+		opts = []grpc.ServerOption{grpc.Creds(*creds)}
+	}
+
+	grpc := grpc.NewServer(opts...)
 
 	registerServices(grpc)
 
@@ -128,4 +138,36 @@ func StartGRPC(setup FuncSetup, shutdown FuncShutdown, host string, registerServ
 	grpc.GracefulStop()
 
 	log.Println("grpc server has been shutdown")
+}
+
+func LoadTLSCredentialsForServer(certPath, keyPath string) (credentials.TransportCredentials, error) {
+	serverCert, err := tls.LoadX509KeyPair(certPath, keyPath)
+	if err != nil {
+		return nil, err
+	}
+
+	config := &tls.Config{
+		Certificates: []tls.Certificate{serverCert},
+		ClientAuth:   tls.NoClientCert,
+	}
+
+	return credentials.NewTLS(config), nil
+}
+
+func LoadTLSCredentialsForClient(certPath string) (credentials.TransportCredentials, error) {
+	pemServerCA, err := ioutil.ReadFile(certPath)
+	if err != nil {
+		return nil, err
+	}
+
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(pemServerCA) {
+		return nil, fmt.Errorf("failed to add server CA's certificate")
+	}
+
+	config := &tls.Config{
+		RootCAs: certPool,
+	}
+
+	return credentials.NewTLS(config), nil
 }
