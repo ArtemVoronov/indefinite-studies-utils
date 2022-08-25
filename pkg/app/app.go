@@ -99,6 +99,14 @@ func ShutdownTimeout() time.Duration {
 	return utils.EnvVarDurationDefault("APP_SHUTDOWN_TIMEOUT_IN_SECONDS", time.Second, 5*time.Second)
 }
 
+func TLSCredentials() credentials.TransportCredentials {
+	creds, err := LoadTLSCredentialsForServer(utils.EnvVar("APP_TLS_CERT_PATH"), utils.EnvVar("APP_TLS_KEY_PATH"))
+	if err != nil {
+		log.Fatalf("unable to load TLS credentials")
+	}
+	return creds
+}
+
 type FuncRegisterService func(s *grpc.Server)
 
 func StartGRPC(setup FuncSetup, shutdown FuncShutdown, host string, registerServices FuncRegisterService, creds *credentials.TransportCredentials) {
