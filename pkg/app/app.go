@@ -23,7 +23,10 @@ import (
 )
 
 type FuncSetup func()
+
 type FuncShutdown func()
+
+type FuncRegisterService func(s *grpc.Server)
 
 func StartHTTP(setup FuncSetup, shutdown FuncShutdown, host string, router *gin.Engine) {
 	LoadEnv()
@@ -62,6 +65,45 @@ func StartHTTP(setup FuncSetup, shutdown FuncShutdown, host string, router *gin.
 	}
 
 	log.Println("http server has been shutdown")
+}
+
+func StartGRPC(setup FuncSetup, shutdown FuncShutdown, host string, registerServices FuncRegisterService, creds *credentials.TransportCredentials) {
+	setup()
+	defer shutdown()
+	lis, err := net.Listen("tcp", host)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	var opts []grpc.ServerOption
+	if creds != nil {
+		opts = []grpc.ServerOption{grpc.Creds(*creds)}
+	}
+
+	grpc := grpc.NewServer(opts...)
+
+	registerServices(grpc)
+
+	go func() {
+		log.Printf("grpc server listening at %v", lis.Addr())
+		err := grpc.Serve(lis)
+		if err != nil {
+			log.Fatalf("failed to serve: %v", err)
+		}
+	}()
+
+	quit := make(chan os.Signal)
+	// kill (no param) default send syscall.SIGTERM
+	// kill -2 is syscall.SIGINT
+	// kill -9 is syscall.SIGKILL but can't be caught, so don't need to add it
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	log.Println("grpc server shutting down server ...")
+
+	grpc.GracefulStop()
+
+	log.Println("grpc server has been shutdown")
 }
 
 func LoadEnv() {
@@ -105,47 +147,6 @@ func TLSCredentials() credentials.TransportCredentials {
 		log.Fatalf("unable to load TLS credentials")
 	}
 	return creds
-}
-
-type FuncRegisterService func(s *grpc.Server)
-
-func StartGRPC(setup FuncSetup, shutdown FuncShutdown, host string, registerServices FuncRegisterService, creds *credentials.TransportCredentials) {
-	setup()
-	defer shutdown()
-	lis, err := net.Listen("tcp", host)
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-
-	var opts []grpc.ServerOption
-	if creds != nil {
-		opts = []grpc.ServerOption{grpc.Creds(*creds)}
-	}
-
-	grpc := grpc.NewServer(opts...)
-
-	registerServices(grpc)
-
-	go func() {
-		log.Printf("grpc server listening at %v", lis.Addr())
-		err := grpc.Serve(lis)
-		if err != nil {
-			log.Fatalf("failed to serve: %v", err)
-		}
-	}()
-
-	quit := make(chan os.Signal)
-	// kill (no param) default send syscall.SIGTERM
-	// kill -2 is syscall.SIGINT
-	// kill -9 is syscall.SIGKILL but can't be caught, so don't need to add it
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-
-	log.Println("grpc server shutting down server ...")
-
-	grpc.GracefulStop()
-
-	log.Println("grpc server has been shutdown")
 }
 
 func LoadTLSCredentialsForServer(certPath, keyPath string) (credentials.TransportCredentials, error) {
