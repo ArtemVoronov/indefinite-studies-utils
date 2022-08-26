@@ -12,9 +12,11 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
+	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/services/auth"
 	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -27,6 +29,8 @@ type FuncSetup func()
 type FuncShutdown func()
 
 type FuncRegisterService func(s *grpc.Server)
+
+type FuncVerifyToken func(token string) (*auth.VerificationResult, error)
 
 func StartHTTP(setup FuncSetup, shutdown FuncShutdown, host string, router *gin.Engine) {
 	LoadEnv()
@@ -179,4 +183,33 @@ func LoadTLSCredentialsForClient(certPath string) (credentials.TransportCredenti
 	}
 
 	return credentials.NewTLS(config), nil
+}
+
+func AuthReqired(f FuncVerifyToken) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer") {
+			c.JSON(http.StatusUnauthorized, "Unauthorized")
+			c.Abort()
+			return
+		}
+
+		token := authHeader[len("Bearer "):]
+		verificationResult, err := f(token)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, "Internal Server Error")
+			log.Printf("error during verifying access token: %v\n", err)
+			c.Abort()
+			return
+		}
+
+		if (*verificationResult).IsExpired {
+			c.JSON(http.StatusUnauthorized, "Unauthorized")
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
 }
