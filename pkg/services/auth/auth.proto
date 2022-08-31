@@ -6,6 +6,7 @@ package auth;
 
 service AuthService {
   rpc VerifyToken (VerifyTokenRequest) returns (VerifyTokenReply) {}
+  rpc GetTokenClaims (GetTokenClaimsRequest) returns (GetTokenClaimsReply) {}
 }
 
 message VerifyTokenRequest {
@@ -15,4 +16,14 @@ message VerifyTokenRequest {
 message VerifyTokenReply {
   bool isValid = 1;
   bool isExpired = 2;
+}
+
+
+message GetTokenClaimsRequest {
+  string token = 1;
+}
+
+message GetTokenClaimsReply {
+  int32 id = 1;
+  string type = 2;
 }

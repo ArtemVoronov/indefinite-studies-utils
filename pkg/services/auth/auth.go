@@ -15,6 +15,11 @@ type VerificationResult struct {
 	IsExpired bool
 }
 
+type TokenClaimsResult struct {
+	Id   int
+	Type string
+}
+
 type AuthGRPCService struct {
 	serverHost   string
 	dialOptions  []grpc.DialOption
@@ -75,6 +80,31 @@ func (s *AuthGRPCService) VerifyToken(token string) (*VerificationResult, error)
 	result = &VerificationResult{
 		IsValid:   reply.GetIsValid(),
 		IsExpired: reply.GetIsExpired(),
+	}
+
+	return result, nil
+}
+
+func (s *AuthGRPCService) GetTokenClaims(token string) (*TokenClaimsResult, error) {
+	var result *TokenClaimsResult
+	if s.connection == nil {
+		err := s.connect()
+		if err != nil {
+			return result, fmt.Errorf("could not greet: %v", err)
+		}
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
+	defer cancel()
+
+	reply, err := s.client.GetTokenClaims(ctx, &GetTokenClaimsRequest{Token: token})
+	if err != nil {
+		return result, fmt.Errorf("could not greet: %v", err)
+	}
+
+	result = &TokenClaimsResult{
+		Id:   int(reply.GetId()),
+		Type: reply.GetType(),
 	}
 
 	return result, nil
