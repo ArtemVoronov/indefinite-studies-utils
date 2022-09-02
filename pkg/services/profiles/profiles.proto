@@ -1,11 +1,16 @@
 syntax = "proto3";
 
+import "google/protobuf/timestamp.proto";
+
 option go_package = "github.com/ArtemVoronov/indefinite-studies-utils/pkg/services/profiles/profiles";
 
 package profiles;
 
 service ProfilesService {
   rpc ValidateCredentials (ValidateCredentialsRequest) returns (ValidateCredentialsReply) {}
+  rpc GetUser (GetUserRequest) returns (GetUserReply) {}
+  rpc GetUsers(GetUsersRequest) returns (GetUsersReply) {}
+  rpc GetUsersStream(stream GetUserRequest) returns (stream GetUserReply) {}
 }
 
 message ValidateCredentialsRequest {
@@ -16,4 +21,26 @@ message ValidateCredentialsRequest {
 message ValidateCredentialsReply {
   int32 userId = 1;
   bool isValid = 2;
+}
+
+message GetUserRequest {
+  int32 id = 1;
+}
+
+message GetUserReply {
+  int32 id = 1;
+  string login = 2;
+  string email = 3;
+  string role = 4;
+  string state = 5;
+  google.protobuf.Timestamp createDate = 6;
+  google.protobuf.Timestamp lastUpdateDate = 7;
+}
+
+message GetUsersRequest {
+  repeated int32 ids = 1 [packed=true];
+}
+
+message GetUsersReply {
+  repeated GetUserReply users = 1;
 }

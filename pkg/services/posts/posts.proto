@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/ArtemVoronov/indefinite-studies-utils/pkg/services/posts/posts";
+
+package posts;
+
+service PostsService {
+  rpc GetPost (GetPostRequest) returns (GetPostReply) {}
+  rpc GetPosts(GetPostsRequest) returns (GetPostsReply) {}
+  rpc GetPostsStream(stream GetPostRequest) returns (stream GetPostReply) {}
+  rpc GetComment (GetCommentRequest) returns (GetCommentReply) {}
+  rpc GetComments(GetCommentsRequest) returns (GetCommentsReply) {}
+  rpc GetCommentsStream(stream GetCommentRequest) returns (stream GetCommentReply) {}
+}
+
+message GetPostRequest {
+  int32 id = 1;
+}
+
+message GetPostReply {
+  int32 id = 1;
+  int32 authorId = 2;
+  string text = 3;
+  string previewText = 4;
+  string topic = 5;
+  string state = 6;
+  google.protobuf.Timestamp createDate = 7;
+  google.protobuf.Timestamp lastUpdateDate = 8;
+}
+
+message GetPostsRequest {
+  repeated int32 ids = 1 [packed=true];
+}
+
+message GetPostsReply {
+  repeated GetPostReply users = 1;
+}
+
+message GetCommentRequest {
+  int32 id = 1;
+}
+
+message GetCommentReply {
+  int32 id = 1;
+  int32 authorId = 2;
+  int32 postId = 3;
+  int32 linkedCommentId = 5;
+  string text = 6;
+  string state = 7;
+  google.protobuf.Timestamp createDate = 8;
+  google.protobuf.Timestamp lastUpdateDate = 9;
+}
+
+message GetCommentsRequest {
+  repeated int32 ids = 1 [packed=true];
+}
+
+message GetCommentsReply {
+  repeated GetCommentReply users = 1;
+}

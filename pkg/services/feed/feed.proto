@@ -1,0 +1,108 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/ArtemVoronov/indefinite-studies-utils/pkg/services/posts/posts";
+
+package posts;
+
+service FeedBuilderService {
+  rpc CreatePost (CreatePostRequest) returns (CreatePostReply) {}
+  rpc UpdatePost (UpdatePostRequest) returns (UpdatePostReply) {}
+  rpc DeletePost (DeletePostRequest) returns (DeletePostReply) {}
+  rpc CreateComment (CreateCommentRequest) returns (CreateCommentReply) {}
+  rpc UpdateComment (UpdateCommentRequest) returns (UpdateCommentReply) {}
+  rpc DeleteComment (DeleteCommentRequest) returns (DeleteCommentReply) {}
+  rpc UpdateUser (UpdateUserRequest) returns (UpdateUserReply) {}
+  rpc DeleteUser (DeleteUserRequest) returns (DeleteUserReply) {}
+}
+
+message CreatePostRequest {
+  int32 id = 1;
+  int32 authorId = 2;
+  string text = 3;
+  string previewText = 4;
+  string topic = 5;
+  string state = 6;
+  google.protobuf.Timestamp createDate = 7;
+  google.protobuf.Timestamp lastUpdateDate = 8;
+}
+
+message CreatePostReply {
+}
+
+message UpdatePostRequest {
+  int32 id = 1;
+  int32 authorId = 2;
+  string text = 3;
+  string previewText = 4;
+  string topic = 5;
+  string state = 6;
+  google.protobuf.Timestamp createDate = 7;
+  google.protobuf.Timestamp lastUpdateDate = 8;
+}
+
+message UpdatePostReply {
+}
+
+message DeletePostRequest {
+  int32 id = 1;
+}
+
+message DeletePostReply {
+}
+
+message CreateCommentRequest {
+  int32 id = 1;
+  int32 authorId = 2;
+  int32 postId = 3;
+  int32 linkedCommentId = 5;
+  string text = 6;
+  string state = 7;
+  google.protobuf.Timestamp createDate = 8;
+  google.protobuf.Timestamp lastUpdateDate = 9;
+}
+
+message CreateCommentReply {
+}
+
+message UpdateCommentRequest {
+  int32 id = 1;
+  int32 authorId = 2;
+  int32 postId = 3;
+  int32 linkedCommentId = 5;
+  string text = 6;
+  string state = 7;
+  google.protobuf.Timestamp createDate = 8;
+  google.protobuf.Timestamp lastUpdateDate = 9;
+}
+
+message UpdateCommentReply {
+}
+
+message DeleteCommentRequest {
+  int32 id = 1;
+}
+
+message DeleteCommentReply {
+}
+
+message UpdateUserRequest {
+  int32 id = 1;
+  string login = 2;
+  string email = 3;
+  string role = 4;
+  string state = 5;
+  google.protobuf.Timestamp createDate = 6;
+  google.protobuf.Timestamp lastUpdateDate = 7;
+}
+
+message UpdateUserReply {
+}
+
+message DeleteUserRequest {
+  int32 id = 1;
+}
+
+message DeleteUserReply {
+}

@@ -18,7 +18,6 @@ message VerifyTokenReply {
   bool isExpired = 2;
 }
 
-
 message GetTokenClaimsRequest {
   string token = 1;
 }
