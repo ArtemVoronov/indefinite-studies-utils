@@ -35,7 +35,7 @@ message GetPostsRequest {
 }
 
 message GetPostsReply {
-  repeated GetPostReply users = 1;
+  repeated GetPostReply posts = 1;
 }
 
 message GetCommentRequest {
@@ -58,5 +58,5 @@ message GetCommentsRequest {
 }
 
 message GetCommentsReply {
-  repeated GetCommentReply users = 1;
+  repeated GetCommentReply comments = 1;
 }

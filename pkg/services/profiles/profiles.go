@@ -71,7 +71,7 @@ func (s *ProfilesGRPCService) ValidateCredentials(login string, password string)
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return result, fmt.Errorf("could not greet: %v", err)
+			return result, fmt.Errorf("could not ValidateCredentials: %v", err)
 		}
 	}
 
@@ -80,7 +80,7 @@ func (s *ProfilesGRPCService) ValidateCredentials(login string, password string)
 
 	reply, err := s.client.ValidateCredentials(ctx, &ValidateCredentialsRequest{Login: login, Password: password})
 	if err != nil {
-		return result, fmt.Errorf("could not greet: %v", err)
+		return result, fmt.Errorf("could not ValidateCredentials: %v", err)
 	}
 
 	result = &CredentialsValidationResult{
@@ -96,7 +96,7 @@ func (s *ProfilesGRPCService) GetUser(userId int32) (*GetUserResult, error) {
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return result, fmt.Errorf("could not greet: %v", err)
+			return result, fmt.Errorf("could not GetUser: %v", err)
 		}
 	}
 
@@ -105,7 +105,7 @@ func (s *ProfilesGRPCService) GetUser(userId int32) (*GetUserResult, error) {
 
 	reply, err := s.client.GetUser(ctx, &GetUserRequest{Id: userId})
 	if err != nil {
-		return result, fmt.Errorf("could not greet: %v", err)
+		return result, fmt.Errorf("could not GetUser: %v", err)
 	}
 
 	result = &GetUserResult{
@@ -126,7 +126,7 @@ func (s *ProfilesGRPCService) GetUsers(userIds []int32) ([]GetUserResult, error)
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return result, fmt.Errorf("could not greet: %v", err)
+			return result, fmt.Errorf("could not GetUsers: %v", err)
 		}
 	}
 
@@ -135,7 +135,7 @@ func (s *ProfilesGRPCService) GetUsers(userIds []int32) ([]GetUserResult, error)
 
 	reply, err := s.client.GetUsers(ctx, &GetUsersRequest{Ids: userIds})
 	if err != nil {
-		return result, fmt.Errorf("could not greet: %v", err)
+		return result, fmt.Errorf("could not GetUsers: %v", err)
 	}
 
 	users := reply.GetUsers()
@@ -161,7 +161,7 @@ func (s *ProfilesGRPCService) GetUsersStream(userIds []int32) (<-chan (GetUserRe
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return result, fmt.Errorf("could not greet: %v", err)
+			return result, fmt.Errorf("could not GetUsersStream: %v", err)
 		}
 	}
 
@@ -170,7 +170,7 @@ func (s *ProfilesGRPCService) GetUsersStream(userIds []int32) (<-chan (GetUserRe
 
 	stream, err := s.client.GetUsersStream(ctx)
 	if err != nil {
-		return result, fmt.Errorf("could not greet: %v", err)
+		return result, fmt.Errorf("could not GetUsersStream: %v", err)
 	}
 	defer stream.CloseSend()
 
