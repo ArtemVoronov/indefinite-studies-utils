@@ -4,7 +4,7 @@
 // - protoc             v3.12.4
 // source: pkg/services/feed/feed.proto
 
-package posts
+package feed
 
 import (
 	context "context"

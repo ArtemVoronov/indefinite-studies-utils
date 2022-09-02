@@ -2,7 +2,7 @@ syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
 
-option go_package = "github.com/ArtemVoronov/indefinite-studies-utils/pkg/services/posts/posts";
+option go_package = "github.com/ArtemVoronov/indefinite-studies-utils/pkg/services/feed/feed";
 
 package posts;
 
