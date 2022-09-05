@@ -169,7 +169,7 @@ func (s *FeedBuilderGRPCService) DeleteComment(postId int32, commentId int32) er
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
-	_, err := s.client.DeleteComment(ctx, &DeleteCommentRequest{Id: commentId, PostId: postId})
+	_, err := s.client.DeleteComment(ctx, &DeleteCommentRequest{CommentId: commentId, PostId: postId})
 	return err
 }
 func (s *FeedBuilderGRPCService) UpdateUser(user *FeedUserDTO) error {
