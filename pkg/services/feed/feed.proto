@@ -82,6 +82,7 @@ message UpdateCommentReply {
 
 message DeleteCommentRequest {
   int32 id = 1;
+  int32 postId = 2;
 }
 
 message DeleteCommentReply {
