@@ -54,7 +54,7 @@ func (s *RedisService) WithTimeoutVoid(f QueryFuncVoid) func() error {
 
 func createClient() *redis.Client {
 	return redis.NewClient(&redis.Options{
-		Addr:     utils.EnvVar("REDIS_HOST") + ":" + utils.EnvVar("REDIS_POST"),
+		Addr:     utils.EnvVar("REDIS_HOST") + ":" + utils.EnvVar("REDIS_PORT"),
 		Username: utils.EnvVar("REDIS_USER"),
 		Password: utils.EnvVar("REDIS_PASSWORD"),
 		DB:       utils.EnvVarIntDefault("REDIS_DATABASE_NUMBER", 0),
