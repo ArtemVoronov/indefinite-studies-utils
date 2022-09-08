@@ -59,9 +59,9 @@ message GetCommentReply {
 }
 
 message GetCommentsRequest {  
-  int32 offset = 1;
-  int32 limit = 2;
-  repeated int32 ids = 3 [packed=true];
+  int32 postId = 1;
+  int32 offset = 2;
+  int32 limit = 3;
 }
 
 message GetCommentsReply {

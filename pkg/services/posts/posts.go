@@ -225,7 +225,7 @@ func (s *PostsGRPCService) GetComment(postId int32) (*GetCommentResult, error) {
 	return result, nil
 }
 
-func (s *PostsGRPCService) GetComments(offset int32, limit int32, userIds []int32) ([]GetCommentResult, error) {
+func (s *PostsGRPCService) GetComments(postId int32, offset int32, limit int32) ([]GetCommentResult, error) {
 	var result []GetCommentResult
 	if s.connection == nil {
 		err := s.connect()
@@ -237,7 +237,7 @@ func (s *PostsGRPCService) GetComments(offset int32, limit int32, userIds []int3
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
-	reply, err := s.client.GetComments(ctx, &GetCommentsRequest{Offset: offset, Limit: limit, Ids: userIds})
+	reply, err := s.client.GetComments(ctx, &GetCommentsRequest{PostId: postId, Offset: offset, Limit: limit})
 	if err != nil {
 		return result, fmt.Errorf("could not GetComments: %v", err)
 	}
