@@ -31,11 +31,16 @@ message GetPostReply {
 }
 
 message GetPostsRequest {
-  repeated int32 ids = 1 [packed=true];
+  int32 offset = 1;
+  int32 limit = 2;
+  repeated int32 ids = 3 [packed=true];
 }
 
 message GetPostsReply {
-  repeated GetPostReply posts = 1;
+  int32 count = 1;
+  int32 offset = 2;
+  int32 limit = 3;
+  repeated GetPostReply posts = 4;
 }
 
 message GetCommentRequest {
@@ -53,10 +58,15 @@ message GetCommentReply {
   google.protobuf.Timestamp lastUpdateDate = 9;
 }
 
-message GetCommentsRequest {
-  repeated int32 ids = 1 [packed=true];
+message GetCommentsRequest {  
+  int32 offset = 1;
+  int32 limit = 2;
+  repeated int32 ids = 3 [packed=true];
 }
 
 message GetCommentsReply {
-  repeated GetCommentReply comments = 1;
+  int32 count = 1;
+  int32 offset = 2;
+  int32 limit = 3;
+  repeated GetCommentReply comments = 4;
 }

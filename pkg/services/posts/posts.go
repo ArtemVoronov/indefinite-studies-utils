@@ -104,7 +104,7 @@ func (s *PostsGRPCService) GetPost(postId int32) (*GetPostResult, error) {
 	return result, nil
 }
 
-func (s *PostsGRPCService) GetPosts(userIds []int32) ([]GetPostResult, error) {
+func (s *PostsGRPCService) GetPosts(offset int32, limit int32, userIds []int32) ([]GetPostResult, error) {
 	var result []GetPostResult
 	if s.connection == nil {
 		err := s.connect()
@@ -116,7 +116,7 @@ func (s *PostsGRPCService) GetPosts(userIds []int32) ([]GetPostResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
-	reply, err := s.client.GetPosts(ctx, &GetPostsRequest{Ids: userIds})
+	reply, err := s.client.GetPosts(ctx, &GetPostsRequest{Offset: offset, Limit: limit, Ids: userIds})
 	if err != nil {
 		return result, fmt.Errorf("could not GetPosts: %v", err)
 	}
@@ -225,7 +225,7 @@ func (s *PostsGRPCService) GetComment(postId int32) (*GetCommentResult, error) {
 	return result, nil
 }
 
-func (s *PostsGRPCService) GetComments(userIds []int32) ([]GetCommentResult, error) {
+func (s *PostsGRPCService) GetComments(offset int32, limit int32, userIds []int32) ([]GetCommentResult, error) {
 	var result []GetCommentResult
 	if s.connection == nil {
 		err := s.connect()
@@ -237,7 +237,7 @@ func (s *PostsGRPCService) GetComments(userIds []int32) ([]GetCommentResult, err
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
-	reply, err := s.client.GetComments(ctx, &GetCommentsRequest{Ids: userIds})
+	reply, err := s.client.GetComments(ctx, &GetCommentsRequest{Offset: offset, Limit: limit, Ids: userIds})
 	if err != nil {
 		return result, fmt.Errorf("could not GetComments: %v", err)
 	}
