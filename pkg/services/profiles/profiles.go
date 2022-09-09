@@ -121,7 +121,7 @@ func (s *ProfilesGRPCService) GetUser(userId int32) (*GetUserResult, error) {
 	return result, nil
 }
 
-func (s *ProfilesGRPCService) GetUsers(userIds []int32) ([]GetUserResult, error) {
+func (s *ProfilesGRPCService) GetUsers(offset int32, limit int32, userIds []int32) ([]GetUserResult, error) {
 	var result []GetUserResult
 	if s.connection == nil {
 		err := s.connect()
@@ -133,7 +133,7 @@ func (s *ProfilesGRPCService) GetUsers(userIds []int32) ([]GetUserResult, error)
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
-	reply, err := s.client.GetUsers(ctx, &GetUsersRequest{Ids: userIds})
+	reply, err := s.client.GetUsers(ctx, &GetUsersRequest{Offset: offset, Limit: limit, Ids: userIds})
 	if err != nil {
 		return result, fmt.Errorf("could not GetUsers: %v", err)
 	}

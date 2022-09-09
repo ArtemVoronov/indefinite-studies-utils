@@ -38,9 +38,14 @@ message GetUserReply {
 }
 
 message GetUsersRequest {
-  repeated int32 ids = 1 [packed=true];
+  int32 offset = 1;
+  int32 limit = 2;
+  repeated int32 ids = 3 [packed=true];
 }
 
 message GetUsersReply {
-  repeated GetUserReply users = 1;
+  int32 count = 1;
+  int32 offset = 2;
+  int32 limit = 3;
+  repeated GetUserReply users = 4;
 }
