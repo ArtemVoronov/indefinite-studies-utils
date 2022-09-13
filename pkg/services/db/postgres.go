@@ -89,10 +89,16 @@ func createClient() *sql.DB {
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", variables[0], variables[1], variables[2], variables[3], variables[4], variables[5])
 	result, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
-		log.Fatalf("Unable to connect to database : %s", err)
+		log.Fatalf("Unable to open connection to database: %s. Error: %s", variables[4], err)
 	}
 
-	// log.Printf("----- Database service setup succeed. Database name: %s -----", variables[4])
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	err = result.PingContext(ctx)
+	if err != nil {
+		log.Fatalf("Unable to connect to database: %s. Error: %s", variables[4], err)
+	}
 
 	return result
 }

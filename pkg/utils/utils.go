@@ -89,3 +89,27 @@ func EnvVarBytes(varName string) []byte {
 	val := EnvVar(varName)
 	return []byte(val)
 }
+
+func Int32ToIntPtr(val int32) *int {
+	if val == 0 {
+		return nil
+	}
+	result := int(val)
+	return &result
+}
+
+func IntPtrToInt32(val *int) int32 {
+	if val == nil {
+		return 0
+	}
+	result := int32(*val)
+	return result
+}
+
+func Int32SliceToIntSlice(input []int32) []int {
+	result := make([]int, len(input))
+	for i := range result {
+		result[i] = int(input[i])
+	}
+	return result
+}

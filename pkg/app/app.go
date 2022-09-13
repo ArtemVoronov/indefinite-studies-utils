@@ -33,7 +33,6 @@ type FuncRegisterService func(s *grpc.Server)
 type FuncVerifyToken func(token string) (*auth.VerificationResult, error)
 
 func StartHTTP(setup FuncSetup, shutdown FuncShutdown, host string, router *gin.Engine) {
-	LoadEnv()
 	setup()
 	defer shutdown()
 	srv := &http.Server{

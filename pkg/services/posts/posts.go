@@ -6,6 +6,7 @@ import (
 	"io"
 	"time"
 
+	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/utils"
 	grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
@@ -215,7 +216,7 @@ func (s *PostsGRPCService) GetComment(postId int32) (*GetCommentResult, error) {
 		Id:              int(reply.GetId()),
 		AuthorId:        int(reply.GetAuthorId()),
 		PostId:          int(reply.GetPostId()),
-		LinkedCommentId: parseNillable(reply.GetLinkedCommentId()),
+		LinkedCommentId: utils.Int32ToIntPtr(reply.GetLinkedCommentId()),
 		Text:            reply.GetText(),
 		State:           reply.GetState(),
 		CreateDate:      reply.GetCreateDate().AsTime(),
@@ -249,7 +250,7 @@ func (s *PostsGRPCService) GetComments(postId int32, offset int32, limit int32) 
 			Id:              int(commentPtr.GetId()),
 			AuthorId:        int(commentPtr.GetAuthorId()),
 			PostId:          int(commentPtr.GetPostId()),
-			LinkedCommentId: parseNillable(commentPtr.GetLinkedCommentId()),
+			LinkedCommentId: utils.Int32ToIntPtr(commentPtr.GetLinkedCommentId()),
 			Text:            commentPtr.GetText(),
 			State:           commentPtr.GetState(),
 			CreateDate:      commentPtr.GetCreateDate().AsTime(),
@@ -297,7 +298,7 @@ func (s *PostsGRPCService) GetCommentsStream(userIds []int32) (<-chan (GetCommen
 				Id:              int(in.GetId()),
 				AuthorId:        int(in.GetAuthorId()),
 				PostId:          int(in.GetPostId()),
-				LinkedCommentId: parseNillable(in.GetLinkedCommentId()),
+				LinkedCommentId: utils.Int32ToIntPtr(in.GetLinkedCommentId()),
 				Text:            in.GetText(),
 				State:           in.GetState(),
 				CreateDate:      in.GetCreateDate().AsTime(),
@@ -313,12 +314,4 @@ func (s *PostsGRPCService) GetCommentsStream(userIds []int32) (<-chan (GetCommen
 		}
 	}
 	return result, resultErr
-}
-
-func parseNillable(val int32) *int {
-	if val == 0 {
-		return nil
-	}
-	result := int(val)
-	return &result
 }
