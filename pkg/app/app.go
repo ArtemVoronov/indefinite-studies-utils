@@ -19,7 +19,10 @@ import (
 	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/services/auth"
 	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/utils"
 	"github.com/gin-gonic/gin"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -70,7 +73,7 @@ func StartHTTP(setup FuncSetup, shutdown FuncShutdown, host string, router *gin.
 	log.Println("http server has been shutdown")
 }
 
-func StartGRPC(setup FuncSetup, shutdown FuncShutdown, host string, registerServices FuncRegisterService, creds *credentials.TransportCredentials) {
+func StartGRPC(setup FuncSetup, shutdown FuncShutdown, host string, registerServices FuncRegisterService, creds *credentials.TransportCredentials, logger *logrus.Logger) {
 	setup()
 	defer shutdown()
 	lis, err := net.Listen("tcp", host)
@@ -78,9 +81,22 @@ func StartGRPC(setup FuncSetup, shutdown FuncShutdown, host string, registerServ
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	var opts []grpc.ServerOption
+	var opts []grpc.ServerOption = []grpc.ServerOption{}
 	if creds != nil {
-		opts = []grpc.ServerOption{grpc.Creds(*creds)}
+		opts = append(opts, grpc.Creds(*creds))
+	}
+	if logger != nil {
+		logrusEntry := logrus.NewEntry(logger)
+		// TODO
+		// Shared options for the logger, with a custom gRPC code to log level function.
+		lorgusOpts := []grpc_logrus.Option{
+			// grpc_logrus.WithLevels(customFunc),
+		}
+		// Make sure that log statements internal to gRPC library are logged using the logrus Logger as well.
+		grpc_logrus.ReplaceGrpcLogger(logrusEntry)
+		opts = append(opts, grpc_middleware.WithUnaryServerChain(
+			grpc_logrus.UnaryServerInterceptor(logrusEntry, lorgusOpts...),
+		))
 	}
 
 	grpc := grpc.NewServer(opts...)
@@ -210,5 +226,87 @@ func AuthReqired(f FuncVerifyToken) gin.HandlerFunc {
 		}
 
 		c.Next()
+	}
+}
+
+func NewLogrusLogger() *logrus.Logger {
+	logrusLogger := logrus.New()
+	logrusLogger.SetFormatter(&logrus.JSONFormatter{
+		FieldMap: logrus.FieldMap{
+			logrus.FieldKeyTime: "@timestamp",
+			logrus.FieldKeyMsg:  "message",
+		},
+	})
+	logrusLogger.SetLevel(logrus.DebugLevel)
+	return logrusLogger
+}
+
+func GetDurationInMillseconds(start time.Time) float64 {
+	end := time.Now()
+	duration := end.Sub(start)
+	milliseconds := float64(duration) / float64(time.Millisecond)
+	rounded := float64(int(milliseconds*100+.5)) / 100
+	return rounded
+}
+
+func GetClientIP(c *gin.Context) string {
+	// first check the X-Forwarded-For header
+	requester := c.Request.Header.Get("X-Forwarded-For")
+	// if empty, check the Real-IP header
+	if len(requester) == 0 {
+		requester = c.Request.Header.Get("X-Real-IP")
+	}
+	// if the requester is still empty, use the hard-coded address from the socket
+	if len(requester) == 0 {
+		requester = c.Request.RemoteAddr
+	}
+
+	// if requester is a comma delimited list, take the first one
+	// (this happens when proxied via elastic load balancer then again through nginx)
+	if strings.Contains(requester, ",") {
+		requester = strings.Split(requester, ",")[0]
+	}
+
+	return requester
+}
+
+// GetUserID gets the current_user ID as a string
+func GetUserID(c *gin.Context) string {
+	userID, exists := c.Get("userID")
+	if exists {
+		return userID.(string)
+	}
+	return ""
+}
+
+// JSONLogMiddleware logs a gin HTTP request in JSON format, with some additional custom key/values
+func JSONLogMiddleware(logger *logrus.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Start timer
+		start := time.Now()
+
+		// Process Request
+		c.Next()
+
+		// Stop timer
+		duration := GetDurationInMillseconds(start)
+
+		entry := logger.WithFields(logrus.Fields{
+			"client_ip":  GetClientIP(c),
+			"duration":   duration,
+			"method":     c.Request.Method,
+			"path":       c.Request.RequestURI,
+			"status":     c.Writer.Status(),
+			"user_id":    GetUserID(c),
+			"referrer":   c.Request.Referer(),
+			"request_id": c.Writer.Header().Get("Request-Id"),
+			// "api_version": util.ApiVersion,
+		})
+
+		if c.Writer.Status() >= 500 {
+			entry.Error(c.Errors.String())
+		} else {
+			entry.Info("")
+		}
 	}
 }
