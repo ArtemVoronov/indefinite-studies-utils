@@ -18,6 +18,7 @@ type VerificationResult struct {
 type TokenClaimsResult struct {
 	Id   int
 	Type string
+	Role string
 }
 
 type AuthGRPCService struct {
@@ -105,6 +106,7 @@ func (s *AuthGRPCService) GetTokenClaims(token string) (*TokenClaimsResult, erro
 	result = &TokenClaimsResult{
 		Id:   int(reply.GetId()),
 		Type: reply.GetType(),
+		Role: reply.GetRole(),
 	}
 
 	return result, nil

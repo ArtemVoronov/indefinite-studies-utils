@@ -25,4 +25,5 @@ message GetTokenClaimsRequest {
 message GetTokenClaimsReply {
   int32 id = 1;
   string type = 2;
+  string role = 3;
 }
