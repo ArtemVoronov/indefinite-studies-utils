@@ -21,6 +21,7 @@ message ValidateCredentialsRequest {
 message ValidateCredentialsReply {
   int32 userId = 1;
   bool isValid = 2;
+  string role = 3;
 }
 
 message GetUserRequest {

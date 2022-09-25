@@ -12,8 +12,9 @@ import (
 )
 
 type CredentialsValidationResult struct {
-	UserId  int  `json:"userId" binding:"required"`
-	IsValid bool `json:"isValid" binding:"required"`
+	UserId  int    `json:"userId" binding:"required"`
+	IsValid bool   `json:"isValid" binding:"required"`
+	Role    string `json:"role" binding:"required"`
 }
 
 type GetUserResult struct {
@@ -86,6 +87,7 @@ func (s *ProfilesGRPCService) ValidateCredentials(login string, password string)
 	result = &CredentialsValidationResult{
 		IsValid: reply.GetIsValid(),
 		UserId:  int(reply.GetUserId()),
+		Role:    reply.GetRole(),
 	}
 
 	return result, nil
