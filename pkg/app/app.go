@@ -331,7 +331,7 @@ func RequiredRoles(reqiredRoles []string) gin.HandlerFunc {
 		c.Next()
 	}
 }
-func RequiredOwnerRole(reqiredRoles []string) gin.HandlerFunc {
+func RequiredOwnerRole() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		role := c.GetString(CTX_ROLE_KEY)
 
