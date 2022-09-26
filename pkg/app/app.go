@@ -281,14 +281,6 @@ func GetClientIP(c *gin.Context) string {
 	return requester
 }
 
-func GetContextKey(c *gin.Context, key string) string {
-	val, exists := c.Get(key)
-	if exists {
-		return val.(string)
-	}
-	return ""
-}
-
 func NewLoggerMiddleware(logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
@@ -302,9 +294,9 @@ func NewLoggerMiddleware(logger *logrus.Logger) gin.HandlerFunc {
 			"method":     c.Request.Method,
 			"path":       c.Request.RequestURI,
 			"status":     c.Writer.Status(),
-			"user_id":    GetContextKey(c, CTX_TOKEN_ID_KEY),
-			"user_type":  GetContextKey(c, CTX_TOKEN_TYPE_KEY),
-			"user_role":  GetContextKey(c, CTX_TOKEN_ROLE_KEY),
+			"user_id":    c.GetInt(CTX_TOKEN_ID_KEY),
+			"user_type":  c.GetString(CTX_TOKEN_TYPE_KEY),
+			"user_role":  c.GetString(CTX_TOKEN_ROLE_KEY),
 			"referrer":   c.Request.Referer(),
 			"request_id": c.Writer.Header().Get("Request-Id"),
 		})
@@ -346,14 +338,12 @@ func RequiredOwnerRole() gin.HandlerFunc {
 }
 
 func IsTokenOfUserType(c *gin.Context) bool {
-	tokenType := GetContextKey(c, CTX_TOKEN_TYPE_KEY)
+	tokenType := c.GetString(CTX_TOKEN_TYPE_KEY)
 	return tokenType == entities.TOKEN_TYPE_USER
 }
 
 func IsSameUserOrHasOwnerRole(c *gin.Context, userId int) bool {
-
-	userRoleFromCtx := GetContextKey(c, CTX_TOKEN_ROLE_KEY)
-
+	userRoleFromCtx := c.GetString(CTX_TOKEN_ROLE_KEY)
 	userIdFromCtx, ok := c.Get(CTX_TOKEN_ID_KEY)
 
 	if !ok || userRoleFromCtx != entities.USER_ROLE_OWNER {
