@@ -13,6 +13,9 @@ import (
 type VerificationResult struct {
 	IsValid   bool
 	IsExpired bool
+	Id        int
+	Type      string
+	Role      string
 }
 
 type TokenClaimsResult struct {
@@ -81,6 +84,9 @@ func (s *AuthGRPCService) VerifyToken(token string) (*VerificationResult, error)
 	result = &VerificationResult{
 		IsValid:   reply.GetIsValid(),
 		IsExpired: reply.GetIsExpired(),
+		Id:        int(reply.GetId()),
+		Type:      reply.GetType(),
+		Role:      reply.GetRole(),
 	}
 
 	return result, nil

@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/services/auth"
+	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/services/db/entities"
 	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/utils"
 	"github.com/gin-gonic/gin"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -25,6 +26,10 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+)
+
+const (
+	CTX_ROLE_KEY = "Role"
 )
 
 type FuncSetup func()
@@ -225,6 +230,8 @@ func AuthReqired(f FuncVerifyToken) gin.HandlerFunc {
 			return
 		}
 
+		c.Set(CTX_ROLE_KEY, verificationResult.Role)
+
 		c.Next()
 	}
 }
@@ -308,5 +315,32 @@ func JSONLogMiddleware(logger *logrus.Logger) gin.HandlerFunc {
 		} else {
 			entry.Info("")
 		}
+	}
+}
+
+func RequiredRoles(reqiredRoles []string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		role := c.GetString(CTX_ROLE_KEY)
+
+		if !utils.Contains(reqiredRoles, role) {
+			c.JSON(http.StatusForbidden, "Forbidden")
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}
+func RequiredOwnerRole(reqiredRoles []string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		role := c.GetString(CTX_ROLE_KEY)
+
+		if role != entities.USER_ROLE_OWNER {
+			c.JSON(http.StatusForbidden, "Forbidden")
+			c.Abort()
+			return
+		}
+
+		c.Next()
 	}
 }
