@@ -29,7 +29,9 @@ import (
 )
 
 const (
-	CTX_ROLE_KEY = "Role"
+	CTX_TOKEN_ID_KEY   = "Id"
+	CTX_TOKEN_TYPE_KEY = "Type"
+	CTX_TOKEN_ROLE_KEY = "Role"
 )
 
 type FuncSetup func()
@@ -230,7 +232,9 @@ func AuthReqired(f FuncVerifyToken) gin.HandlerFunc {
 			return
 		}
 
-		c.Set(CTX_ROLE_KEY, verificationResult.Role)
+		c.Set(CTX_TOKEN_ID_KEY, verificationResult.Id)
+		c.Set(CTX_TOKEN_TYPE_KEY, verificationResult.Type)
+		c.Set(CTX_TOKEN_ROLE_KEY, verificationResult.Role)
 
 		c.Next()
 	}
@@ -277,25 +281,19 @@ func GetClientIP(c *gin.Context) string {
 	return requester
 }
 
-// GetUserID gets the current_user ID as a string
-func GetUserID(c *gin.Context) string {
-	userID, exists := c.Get("userID")
+func GetContextKey(c *gin.Context, key string) string {
+	val, exists := c.Get(key)
 	if exists {
-		return userID.(string)
+		return val.(string)
 	}
 	return ""
 }
 
-// JSONLogMiddleware logs a gin HTTP request in JSON format, with some additional custom key/values
-func JSONLogMiddleware(logger *logrus.Logger) gin.HandlerFunc {
+func NewLoggerMiddleware(logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Start timer
 		start := time.Now()
-
-		// Process Request
 		c.Next()
 
-		// Stop timer
 		duration := GetDurationInMillseconds(start)
 
 		entry := logger.WithFields(logrus.Fields{
@@ -304,10 +302,11 @@ func JSONLogMiddleware(logger *logrus.Logger) gin.HandlerFunc {
 			"method":     c.Request.Method,
 			"path":       c.Request.RequestURI,
 			"status":     c.Writer.Status(),
-			"user_id":    GetUserID(c),
+			"user_id":    GetCurrentUserId(c),
+			"user_type":  GetCurrentUserType(c),
+			"user_role":  GetCurrentUserRole(c),
 			"referrer":   c.Request.Referer(),
 			"request_id": c.Writer.Header().Get("Request-Id"),
-			// "api_version": util.ApiVersion,
 		})
 
 		if c.Writer.Status() >= 500 {
@@ -320,7 +319,7 @@ func JSONLogMiddleware(logger *logrus.Logger) gin.HandlerFunc {
 
 func RequiredRoles(reqiredRoles []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		role := c.GetString(CTX_ROLE_KEY)
+		role := GetCurrentUserRole(c)
 
 		if !utils.Contains(reqiredRoles, role) {
 			c.JSON(http.StatusForbidden, "Forbidden")
@@ -331,9 +330,10 @@ func RequiredRoles(reqiredRoles []string) gin.HandlerFunc {
 		c.Next()
 	}
 }
+
 func RequiredOwnerRole() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		role := c.GetString(CTX_ROLE_KEY)
+		role := GetCurrentUserRole(c)
 
 		if role != entities.USER_ROLE_OWNER {
 			c.JSON(http.StatusForbidden, "Forbidden")
@@ -343,4 +343,16 @@ func RequiredOwnerRole() gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+func GetCurrentUserId(c *gin.Context) string {
+	return GetContextKey(c, CTX_TOKEN_ID_KEY)
+}
+
+func GetCurrentUserType(c *gin.Context) string {
+	return GetContextKey(c, CTX_TOKEN_TYPE_KEY)
+}
+
+func GetCurrentUserRole(c *gin.Context) string {
+	return GetContextKey(c, CTX_TOKEN_ROLE_KEY)
 }
