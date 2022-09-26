@@ -1,0 +1,8 @@
+package entities
+
+const (
+	TOKEN_TYPE_USER     = "USER"
+	TOKEN_TYPE_SERVICE  = "SERVICE"
+	AUTH_SERVICE_ID     = -1
+	PROFILES_SERVICE_ID = -2
+)
