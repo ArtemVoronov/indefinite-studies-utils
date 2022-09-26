@@ -362,3 +362,12 @@ func IsSameUserOrHasOwnerRole(c *gin.Context, userId int) bool {
 
 	return userIdFromCtx.(int) == userId
 }
+
+func IsSameUser(c *gin.Context, userId int) bool {
+	userIdFromCtx, ok := c.Get(CTX_TOKEN_ID_KEY)
+	if !ok {
+		return false
+	}
+
+	return userIdFromCtx.(int) == userId
+}
