@@ -16,6 +16,9 @@ message VerifyTokenRequest {
 message VerifyTokenReply {
   bool isValid = 1;
   bool isExpired = 2;
+  int32 id = 3;
+  string type = 4;
+  string role = 5;
 }
 
 message GetTokenClaimsRequest {
