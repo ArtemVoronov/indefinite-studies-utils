@@ -302,7 +302,7 @@ func NewLoggerMiddleware(logger *logrus.Logger) gin.HandlerFunc {
 			"method":     c.Request.Method,
 			"path":       c.Request.RequestURI,
 			"status":     c.Writer.Status(),
-			"user_id":    GetCurrentUserId(c),
+			"user_id":    GetContextKey(c, CTX_TOKEN_ID_KEY),
 			"user_type":  GetCurrentUserType(c),
 			"user_role":  GetCurrentUserRole(c),
 			"referrer":   c.Request.Referer(),
@@ -345,8 +345,8 @@ func RequiredOwnerRole() gin.HandlerFunc {
 	}
 }
 
-func GetCurrentUserId(c *gin.Context) string {
-	return GetContextKey(c, CTX_TOKEN_ID_KEY)
+func GetCurrentUserId(c *gin.Context) int {
+	return c.GetInt(CTX_TOKEN_ID_KEY)
 }
 
 func GetCurrentUserType(c *gin.Context) string {
