@@ -303,8 +303,8 @@ func NewLoggerMiddleware(logger *logrus.Logger) gin.HandlerFunc {
 			"path":       c.Request.RequestURI,
 			"status":     c.Writer.Status(),
 			"user_id":    GetContextKey(c, CTX_TOKEN_ID_KEY),
-			"user_type":  GetCurrentUserType(c),
-			"user_role":  GetCurrentUserRole(c),
+			"user_type":  GetContextKey(c, CTX_TOKEN_TYPE_KEY),
+			"user_role":  GetContextKey(c, CTX_TOKEN_ROLE_KEY),
 			"referrer":   c.Request.Referer(),
 			"request_id": c.Writer.Header().Get("Request-Id"),
 		})
@@ -319,7 +319,7 @@ func NewLoggerMiddleware(logger *logrus.Logger) gin.HandlerFunc {
 
 func RequiredRoles(reqiredRoles []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		role := GetCurrentUserRole(c)
+		role := c.GetString(CTX_TOKEN_ROLE_KEY)
 
 		if !utils.Contains(reqiredRoles, role) {
 			c.JSON(http.StatusForbidden, "Forbidden")
@@ -333,7 +333,7 @@ func RequiredRoles(reqiredRoles []string) gin.HandlerFunc {
 
 func RequiredOwnerRole() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		role := GetCurrentUserRole(c)
+		role := c.GetString(CTX_TOKEN_ROLE_KEY)
 
 		if role != entities.USER_ROLE_OWNER {
 			c.JSON(http.StatusForbidden, "Forbidden")
@@ -345,14 +345,20 @@ func RequiredOwnerRole() gin.HandlerFunc {
 	}
 }
 
-func GetCurrentUserId(c *gin.Context) int {
-	return c.GetInt(CTX_TOKEN_ID_KEY)
+func IsTokenOfUserType(c *gin.Context) bool {
+	tokenType := GetContextKey(c, CTX_TOKEN_TYPE_KEY)
+	return tokenType == entities.TOKEN_TYPE_USER
 }
 
-func GetCurrentUserType(c *gin.Context) string {
-	return GetContextKey(c, CTX_TOKEN_TYPE_KEY)
-}
+func IsSameUserOrHasOwnerRole(c *gin.Context, userId int) bool {
 
-func GetCurrentUserRole(c *gin.Context) string {
-	return GetContextKey(c, CTX_TOKEN_ROLE_KEY)
+	userRoleFromCtx := GetContextKey(c, CTX_TOKEN_ROLE_KEY)
+
+	userIdFromCtx, ok := c.Get(CTX_TOKEN_ID_KEY)
+
+	if !ok || userRoleFromCtx != entities.USER_ROLE_OWNER {
+		return false
+	}
+
+	return userIdFromCtx.(int) == userId
 }
