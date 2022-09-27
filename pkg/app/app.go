@@ -342,17 +342,6 @@ func IsTokenOfUserType(c *gin.Context) bool {
 	return tokenType == entities.TOKEN_TYPE_USER
 }
 
-func IsSameUserOrHasOwnerRole(c *gin.Context, userId int) bool {
-	userRoleFromCtx := c.GetString(CTX_TOKEN_ROLE_KEY)
-	userIdFromCtx, ok := c.Get(CTX_TOKEN_ID_KEY)
-
-	if !ok || userRoleFromCtx != entities.USER_ROLE_OWNER {
-		return false
-	}
-
-	return userIdFromCtx.(int) == userId
-}
-
 func IsSameUser(c *gin.Context, userId int) bool {
 	userIdFromCtx, ok := c.Get(CTX_TOKEN_ID_KEY)
 	if !ok {
@@ -360,4 +349,14 @@ func IsSameUser(c *gin.Context, userId int) bool {
 	}
 
 	return userIdFromCtx.(int) == userId
+}
+
+func HasOwnerRole(c *gin.Context) bool {
+	return HasRole(c, entities.USER_ROLE_OWNER)
+}
+
+func HasRole(c *gin.Context, role string) bool {
+	userRoleFromCtx := c.GetString(CTX_TOKEN_ROLE_KEY)
+
+	return userRoleFromCtx == role
 }
