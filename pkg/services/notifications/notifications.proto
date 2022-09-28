@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option go_package = "github.com/ArtemVoronov/indefinite-studies-utils/pkg/services/notifications/notifications";
+
+package notifications;
+
+service NotificationsService {
+  rpc SendEmail (SendEmailRequest) returns (SendEmailReply) {}
+}
+
+message SendEmailRequest {
+  string sender = 1;
+  string recepient = 2;
+  string body = 3;
+}
+
+message SendEmailReply {
+}
