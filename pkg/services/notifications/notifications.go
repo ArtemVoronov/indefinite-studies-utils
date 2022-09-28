@@ -51,11 +51,10 @@ func (s *NotificationsGRPCService) Shutdown() error {
 }
 
 func (s *NotificationsGRPCService) SendEmail(sender string, recepient string, body string) error {
-
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return fmt.Errorf("could not GetPost: %v", err)
+			return fmt.Errorf("could not SendEmail: %v", err)
 		}
 	}
 
@@ -64,7 +63,7 @@ func (s *NotificationsGRPCService) SendEmail(sender string, recepient string, bo
 
 	_, err := s.client.SendEmail(ctx, &SendEmailRequest{Sender: sender, Recepient: recepient, Body: body})
 	if err != nil {
-		return fmt.Errorf("could not GetPost: %v", err)
+		return fmt.Errorf("could not SendEmail: %v", err)
 	}
 
 	return nil
