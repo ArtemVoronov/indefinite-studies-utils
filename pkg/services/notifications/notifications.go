@@ -18,7 +18,7 @@ type NotificationsGRPCService struct {
 	queryTimeout time.Duration
 }
 
-func CreatePostsGRPCService(serverHost string, creds *credentials.TransportCredentials) *NotificationsGRPCService {
+func CreateNotificationsGRPCService(serverHost string, creds *credentials.TransportCredentials) *NotificationsGRPCService {
 	var opts []grpc.DialOption
 	if creds != nil {
 		opts = append(opts, grpc.WithTransportCredentials(*creds))

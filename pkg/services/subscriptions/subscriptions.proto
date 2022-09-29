@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+option go_package = "github.com/ArtemVoronov/indefinite-studies-utils/pkg/services/subscriptions/subscriptions";
+
+package subscriptions;
+
+service SubscriptionsService {
+  rpc PutEvent (PutEventRequest) returns (PutEventReply) {}
+  rpc GetEvent (GetEventRequest) returns (GetEventReply) {}
+  // TODO: SubscribeOnEvent
+  // TODO: UnSubscribeOnEvent
+}
+
+message PutEventRequest {
+  string eventType = 1;
+  string eventBody = 2;
+}
+
+message PutEventReply {
+}
+
+message GetEventRequest {
+  string eventType = 1;
+}
+
+message GetEventReply {
+  string eventType = 1;
+  string eventBody = 2;
+}
