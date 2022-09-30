@@ -23,7 +23,6 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SubscriptionsServiceClient interface {
 	PutEvent(ctx context.Context, in *PutEventRequest, opts ...grpc.CallOption) (*PutEventReply, error)
-	GetEvent(ctx context.Context, in *GetEventRequest, opts ...grpc.CallOption) (*GetEventReply, error)
 }
 
 type subscriptionsServiceClient struct {
@@ -43,21 +42,11 @@ func (c *subscriptionsServiceClient) PutEvent(ctx context.Context, in *PutEventR
 	return out, nil
 }
 
-func (c *subscriptionsServiceClient) GetEvent(ctx context.Context, in *GetEventRequest, opts ...grpc.CallOption) (*GetEventReply, error) {
-	out := new(GetEventReply)
-	err := c.cc.Invoke(ctx, "/subscriptions.SubscriptionsService/GetEvent", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // SubscriptionsServiceServer is the server API for SubscriptionsService service.
 // All implementations must embed UnimplementedSubscriptionsServiceServer
 // for forward compatibility
 type SubscriptionsServiceServer interface {
 	PutEvent(context.Context, *PutEventRequest) (*PutEventReply, error)
-	GetEvent(context.Context, *GetEventRequest) (*GetEventReply, error)
 	mustEmbedUnimplementedSubscriptionsServiceServer()
 }
 
@@ -67,9 +56,6 @@ type UnimplementedSubscriptionsServiceServer struct {
 
 func (UnimplementedSubscriptionsServiceServer) PutEvent(context.Context, *PutEventRequest) (*PutEventReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PutEvent not implemented")
-}
-func (UnimplementedSubscriptionsServiceServer) GetEvent(context.Context, *GetEventRequest) (*GetEventReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetEvent not implemented")
 }
 func (UnimplementedSubscriptionsServiceServer) mustEmbedUnimplementedSubscriptionsServiceServer() {}
 
@@ -102,24 +88,6 @@ func _SubscriptionsService_PutEvent_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SubscriptionsService_GetEvent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetEventRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(SubscriptionsServiceServer).GetEvent(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/subscriptions.SubscriptionsService/GetEvent",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SubscriptionsServiceServer).GetEvent(ctx, req.(*GetEventRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // SubscriptionsService_ServiceDesc is the grpc.ServiceDesc for SubscriptionsService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -130,10 +98,6 @@ var SubscriptionsService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PutEvent",
 			Handler:    _SubscriptionsService_PutEvent_Handler,
-		},
-		{
-			MethodName: "GetEvent",
-			Handler:    _SubscriptionsService_GetEvent_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -6,9 +6,6 @@ package subscriptions;
 
 service SubscriptionsService {
   rpc PutEvent (PutEventRequest) returns (PutEventReply) {}
-  rpc GetEvent (GetEventRequest) returns (GetEventReply) {}
-  // TODO: SubscribeOnEvent
-  // TODO: UnSubscribeOnEvent
 }
 
 message PutEventRequest {
@@ -17,13 +14,4 @@ message PutEventRequest {
 }
 
 message PutEventReply {
-}
-
-message GetEventRequest {
-  string eventType = 1;
-}
-
-message GetEventReply {
-  string eventType = 1;
-  string eventBody = 2;
 }

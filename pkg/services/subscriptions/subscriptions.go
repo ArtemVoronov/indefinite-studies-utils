@@ -68,22 +68,3 @@ func (s *SubscriptionsGRPCService) PutEvent(eventType string, eventBody string) 
 
 	return nil
 }
-
-func (s *SubscriptionsGRPCService) GetEvent(eventType string) (*GetEventReply, error) {
-	if s.connection == nil {
-		err := s.connect()
-		if err != nil {
-			return nil, fmt.Errorf("could not GetEvent: %v", err)
-		}
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
-	defer cancel()
-
-	result, err := s.client.GetEvent(ctx, &GetEventRequest{EventType: eventType})
-	if err != nil {
-		return nil, fmt.Errorf("could not GetEvent: %v", err)
-	}
-
-	return result, nil
-}
