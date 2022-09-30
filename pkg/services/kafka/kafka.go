@@ -82,7 +82,7 @@ func (s KafkaConsumerService) SubscribeTopics(quit <-chan struct{}, topic string
 		for {
 			select {
 			case <-quit:
-				fmt.Printf("quit\n")
+				fmt.Printf("kafka consumer quit\n")
 				return
 
 			default:
@@ -114,12 +114,11 @@ func (s *KafkaConsumerService) PollTopics(quit <-chan struct{}, topic string, po
 		for {
 			select {
 			case <-quit:
-				fmt.Printf("quit\n")
+				fmt.Printf("kafka consumer quit\n")
 				return
 
 			default:
 				ev := s.consumer.Poll(pollPeriodInMillis)
-				fmt.Printf("ev: %s\n", ev)
 				if ev == nil {
 					continue
 				}
