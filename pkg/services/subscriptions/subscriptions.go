@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/services/kafka"
 	grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
@@ -64,6 +65,30 @@ func (s *SubscriptionsGRPCService) PutEvent(eventType string, eventBody string) 
 	_, err := s.client.PutEvent(ctx, &PutEventRequest{EventType: eventType, EventBody: eventBody})
 	if err != nil {
 		return fmt.Errorf("could not PutEvent: %v", err)
+	}
+
+	return nil
+}
+
+func (s *SubscriptionsGRPCService) PutSendEmailEvent(in kafka.SendEmailEvent) error {
+	if s.connection == nil {
+		err := s.connect()
+		if err != nil {
+			return fmt.Errorf("could not PutSendEmailEvent: %v", err)
+		}
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
+	defer cancel()
+
+	_, err := s.client.PutSendEmailEvent(ctx, &PutSendEmailEventRequest{
+		Sender:    in.Sender,
+		Recepient: in.Recepient,
+		Subject:   in.Subject,
+		Body:      in.Body,
+	})
+	if err != nil {
+		return fmt.Errorf("could not PutSendEmailEvent: %v", err)
 	}
 
 	return nil

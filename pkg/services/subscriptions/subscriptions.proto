@@ -6,6 +6,7 @@ package subscriptions;
 
 service SubscriptionsService {
   rpc PutEvent (PutEventRequest) returns (PutEventReply) {}
+  rpc PutSendEmailEvent (PutSendEmailEventRequest) returns (PutSendEmailEventReply) {}
 }
 
 message PutEventRequest {
@@ -14,4 +15,14 @@ message PutEventRequest {
 }
 
 message PutEventReply {
+}
+
+message PutSendEmailEventRequest {
+  string sender = 1;
+  string recepient = 2;
+  string subject = 3;
+  string body = 4;
+}
+
+message PutSendEmailEventReply {
 }
