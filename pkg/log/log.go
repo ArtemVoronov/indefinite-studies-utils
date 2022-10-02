@@ -4,12 +4,14 @@ import (
 	"log"
 	"os"
 
+	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/utils"
 	"github.com/sirupsen/logrus"
 )
 
 var Log *logrus.Logger = NewLogrusLogger()
 
-func SetLogPath(logpath string) {
+func SetUpLogPath() {
+	logpath := utils.EnvVarDefault("APP_LOGS_PATH", "stdout")
 	if logpath != "stdout" {
 		file, err := os.OpenFile(logpath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 		if err != nil {
