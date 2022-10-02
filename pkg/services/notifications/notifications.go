@@ -50,7 +50,7 @@ func (s *NotificationsGRPCService) Shutdown() error {
 	return nil
 }
 
-func (s *NotificationsGRPCService) SendEmail(sender string, recepient string, body string) error {
+func (s *NotificationsGRPCService) SendEmail(sender string, recepient string, subject string, body string) error {
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
@@ -61,7 +61,7 @@ func (s *NotificationsGRPCService) SendEmail(sender string, recepient string, bo
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
-	_, err := s.client.SendEmail(ctx, &SendEmailRequest{Sender: sender, Recepient: recepient, Body: body})
+	_, err := s.client.SendEmail(ctx, &SendEmailRequest{Sender: sender, Recepient: recepient, Subject: subject, Body: body})
 	if err != nil {
 		return fmt.Errorf("could not SendEmail: %v", err)
 	}

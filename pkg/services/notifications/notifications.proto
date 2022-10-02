@@ -11,7 +11,8 @@ service NotificationsService {
 message SendEmailRequest {
   string sender = 1;
   string recepient = 2;
-  string body = 3;
+  string subject = 3;
+  string body = 4;
 }
 
 message SendEmailReply {
