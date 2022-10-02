@@ -1,9 +1,10 @@
 package whitelist
 
 import (
-	"log"
 	"os"
 	"regexp"
+
+	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/log"
 )
 
 type WhiteListService struct {

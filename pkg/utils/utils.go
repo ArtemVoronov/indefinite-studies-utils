@@ -4,10 +4,11 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/hex"
-	"log"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/log"
 )
 
 func CreateSHA512HashHexEncoded(str string) string {

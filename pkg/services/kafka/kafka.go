@@ -41,8 +41,7 @@ func (s *KafkaProducerService) Shutdown() error {
 }
 
 func (s *KafkaConsumerService) Shutdown() error {
-	s.consumer.Close()
-	return nil
+	return s.consumer.Close()
 }
 
 func (s KafkaProducerService) CreateMessage(topic string, message string) error {

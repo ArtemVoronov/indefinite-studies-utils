@@ -4,10 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 
+	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/log"
 	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/utils"
 	_ "github.com/lib/pq"
 )
@@ -109,7 +109,7 @@ func queryTimeout() time.Duration {
 	valueInt, err := strconv.Atoi(valueStr)
 
 	if err != nil {
-		log.Printf("Unable to read 'DATABASE_QUERY_TIMEOUT_IN_SECONDS' from config, using default value for 30 seconds")
+		log.Info("Unable to read 'DATABASE_QUERY_TIMEOUT_IN_SECONDS' from config, using default value for 30 seconds")
 		return 30 * time.Second
 	}
 

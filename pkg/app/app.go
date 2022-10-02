@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -16,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/log"
 	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/services/auth"
 	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/services/db/entities"
 	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/utils"
@@ -51,10 +51,10 @@ func StartHTTP(setup FuncSetup, shutdown FuncShutdown, host string, router *gin.
 	}
 
 	go func() {
-		log.Printf("http server listening at %v\n", srv.Addr)
+		log.Info(fmt.Sprintf("http server listening at %v\n", srv.Addr))
 		err := srv.ListenAndServe()
 		if err != nil && errors.Is(err, http.ErrServerClosed) {
-			log.Println("http server was closed")
+			log.Info("http server was closed")
 		} else if err != nil {
 			log.Fatalf("unable to start http server: %v\n", err)
 		}
@@ -67,17 +67,17 @@ func StartHTTP(setup FuncSetup, shutdown FuncShutdown, host string, router *gin.
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	log.Println("shutting down http server ...")
+	log.Info("shutting down http server ...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), ShutdownTimeout())
 	defer cancel()
 
 	err := srv.Shutdown(ctx)
 	if err != nil {
-		log.Fatal("http server forced to shutdown:", err)
+		log.Fatalf("http server forced to shutdown: %s", err)
 	}
 
-	log.Println("http server has been shutdown")
+	log.Info("http server has been shutdown")
 }
 
 func StartGRPC(setup FuncSetup, shutdown FuncShutdown, host string, registerServices FuncRegisterService, creds *credentials.TransportCredentials, logger *logrus.Logger) {
@@ -111,7 +111,7 @@ func StartGRPC(setup FuncSetup, shutdown FuncShutdown, host string, registerServ
 	registerServices(grpc)
 
 	go func() {
-		log.Printf("grpc server listening at %v", lis.Addr())
+		log.Info(fmt.Sprintf("grpc server listening at %v", lis.Addr()))
 		err := grpc.Serve(lis)
 		if err != nil {
 			log.Fatalf("failed to serve: %v", err)
@@ -125,17 +125,17 @@ func StartGRPC(setup FuncSetup, shutdown FuncShutdown, host string, registerServ
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	log.Println("grpc server shutting down server ...")
+	log.Info("grpc server shutting down server ...")
 
 	grpc.GracefulStop()
 
-	log.Println("grpc server has been shutdown")
+	log.Info("grpc server has been shutdown")
 }
 
 func LoadEnv() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Print("No .env file found")
+		log.Error("Unable to load environment vars", "No .env file found")
 	}
 }
 
@@ -170,7 +170,7 @@ func ShutdownTimeout() time.Duration {
 func TLSCredentials() credentials.TransportCredentials {
 	creds, err := LoadTLSCredentialsForServer(utils.EnvVar("APP_TLS_CERT_PATH"), utils.EnvVar("APP_TLS_KEY_PATH"))
 	if err != nil {
-		log.Fatalf("unable to load TLS credentials")
+		log.Fatalf("unable to load TLS credentials: %s", err.Error())
 	}
 	return creds
 }
@@ -221,7 +221,7 @@ func AuthReqired(f FuncVerifyToken) gin.HandlerFunc {
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, "Internal Server Error")
-			log.Printf("error during verifying access token: %v\n", err)
+			log.Error("error during verifying access token", err.Error())
 			c.Abort()
 			return
 		}

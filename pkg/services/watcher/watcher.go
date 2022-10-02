@@ -1,8 +1,7 @@
 package watcher
 
 import (
-	"log"
-
+	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/log"
 	kafkaService "github.com/ArtemVoronov/indefinite-studies-utils/pkg/services/kafka"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
@@ -47,9 +46,9 @@ func CreateWatcherService(kafkaHostname string, kafkaGroupId string, topic strin
 	}
 }
 
-func (s *WatcherService) Shutdown() {
+func (s *WatcherService) Shutdown() error {
 	defer close(s.quit)
 	defer close(s.kafkaMessagesChan)
 	defer close(s.kafkaErrorsChan)
-	s.kafkaConsumer.Shutdown()
+	return s.kafkaConsumer.Shutdown()
 }
