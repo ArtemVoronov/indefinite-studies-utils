@@ -19,7 +19,7 @@ type SubscriptionsGRPCService struct {
 	queryTimeout time.Duration
 }
 
-func CreatePostsGRPCService(serverHost string, creds *credentials.TransportCredentials) *SubscriptionsGRPCService {
+func CreateSubscriptionsGRPCService(serverHost string, creds *credentials.TransportCredentials) *SubscriptionsGRPCService {
 	var opts []grpc.DialOption
 	if creds != nil {
 		opts = append(opts, grpc.WithTransportCredentials(*creds))
