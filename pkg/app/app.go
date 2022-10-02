@@ -240,18 +240,6 @@ func AuthReqired(f FuncVerifyToken) gin.HandlerFunc {
 	}
 }
 
-func NewLogrusLogger() *logrus.Logger {
-	logrusLogger := logrus.New()
-	logrusLogger.SetFormatter(&logrus.JSONFormatter{
-		FieldMap: logrus.FieldMap{
-			logrus.FieldKeyTime: "@timestamp",
-			logrus.FieldKeyMsg:  "message",
-		},
-	})
-	logrusLogger.SetLevel(logrus.DebugLevel)
-	return logrusLogger
-}
-
 func GetDurationInMillseconds(start time.Time) float64 {
 	end := time.Now()
 	duration := end.Sub(start)
