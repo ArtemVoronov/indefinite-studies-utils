@@ -14,7 +14,6 @@ service FeedBuilderService {
   rpc UpdateComment (UpdateCommentRequest) returns (UpdateCommentReply) {}
   rpc DeleteComment (DeleteCommentRequest) returns (DeleteCommentReply) {}
   rpc UpdateUser (UpdateUserRequest) returns (UpdateUserReply) {}
-  rpc DeleteUser (DeleteUserRequest) returns (DeleteUserReply) {}
 }
 
 message CreatePostRequest {
@@ -94,16 +93,7 @@ message UpdateUserRequest {
   string email = 3;
   string role = 4;
   string state = 5;
-  google.protobuf.Timestamp createDate = 6;
-  google.protobuf.Timestamp lastUpdateDate = 7;
 }
 
 message UpdateUserReply {
-}
-
-message DeleteUserRequest {
-  int32 id = 1;
-}
-
-message DeleteUserReply {
 }

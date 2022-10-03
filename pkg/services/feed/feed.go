@@ -187,21 +187,6 @@ func (s *FeedBuilderGRPCService) UpdateUser(user *FeedUserDTO) error {
 	return err
 }
 
-func (s *FeedBuilderGRPCService) DeleteUser(userId int32) error {
-	if s.connection == nil {
-		err := s.connect()
-		if err != nil {
-			return fmt.Errorf("could not DeleteUser: %v", err)
-		}
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
-	defer cancel()
-
-	_, err := s.client.DeleteUser(ctx, &DeleteUserRequest{Id: userId})
-	return err
-}
-
 func toCreatePostRequest(post *FeedPostDTO) *CreatePostRequest {
 	return &CreatePostRequest{
 		Id:             post.Id,
@@ -256,12 +241,10 @@ func toUpdateCommentRequest(comment *FeedCommentDTO) *UpdateCommentRequest {
 
 func toUpdateUserRequest(user *FeedUserDTO) *UpdateUserRequest {
 	return &UpdateUserRequest{
-		Id:             user.Id,
-		Login:          user.Login,
-		Email:          user.Email,
-		Role:           user.Role,
-		State:          user.State,
-		CreateDate:     timestamppb.New(user.CreateDate),
-		LastUpdateDate: timestamppb.New(user.LastUpdateDate),
+		Id:    user.Id,
+		Login: user.Login,
+		Email: user.Email,
+		Role:  user.Role,
+		State: user.State,
 	}
 }

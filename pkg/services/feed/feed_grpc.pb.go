@@ -29,7 +29,6 @@ type FeedBuilderServiceClient interface {
 	UpdateComment(ctx context.Context, in *UpdateCommentRequest, opts ...grpc.CallOption) (*UpdateCommentReply, error)
 	DeleteComment(ctx context.Context, in *DeleteCommentRequest, opts ...grpc.CallOption) (*DeleteCommentReply, error)
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserReply, error)
-	DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*DeleteUserReply, error)
 }
 
 type feedBuilderServiceClient struct {
@@ -103,15 +102,6 @@ func (c *feedBuilderServiceClient) UpdateUser(ctx context.Context, in *UpdateUse
 	return out, nil
 }
 
-func (c *feedBuilderServiceClient) DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*DeleteUserReply, error) {
-	out := new(DeleteUserReply)
-	err := c.cc.Invoke(ctx, "/posts.FeedBuilderService/DeleteUser", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // FeedBuilderServiceServer is the server API for FeedBuilderService service.
 // All implementations must embed UnimplementedFeedBuilderServiceServer
 // for forward compatibility
@@ -123,7 +113,6 @@ type FeedBuilderServiceServer interface {
 	UpdateComment(context.Context, *UpdateCommentRequest) (*UpdateCommentReply, error)
 	DeleteComment(context.Context, *DeleteCommentRequest) (*DeleteCommentReply, error)
 	UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserReply, error)
-	DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserReply, error)
 	mustEmbedUnimplementedFeedBuilderServiceServer()
 }
 
@@ -151,9 +140,6 @@ func (UnimplementedFeedBuilderServiceServer) DeleteComment(context.Context, *Del
 }
 func (UnimplementedFeedBuilderServiceServer) UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUser not implemented")
-}
-func (UnimplementedFeedBuilderServiceServer) DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteUser not implemented")
 }
 func (UnimplementedFeedBuilderServiceServer) mustEmbedUnimplementedFeedBuilderServiceServer() {}
 
@@ -294,24 +280,6 @@ func _FeedBuilderService_UpdateUser_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FeedBuilderService_DeleteUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteUserRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(FeedBuilderServiceServer).DeleteUser(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/posts.FeedBuilderService/DeleteUser",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FeedBuilderServiceServer).DeleteUser(ctx, req.(*DeleteUserRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // FeedBuilderService_ServiceDesc is the grpc.ServiceDesc for FeedBuilderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -346,10 +314,6 @@ var FeedBuilderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateUser",
 			Handler:    _FeedBuilderService_UpdateUser_Handler,
-		},
-		{
-			MethodName: "DeleteUser",
-			Handler:    _FeedBuilderService_DeleteUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
