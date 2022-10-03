@@ -3,11 +3,22 @@ package log
 import (
 	"log"
 	"os"
+	"sync"
 
 	"github.com/sirupsen/logrus"
 )
 
-var Log *logrus.Logger = NewLogrusLogger()
+var once sync.Once
+var logger *logrus.Logger
+
+func Instance() *logrus.Logger {
+	once.Do(func() {
+		if logger == nil {
+			logger = NewLogrusLogger()
+		}
+	})
+	return logger
+}
 
 func SetUpLogPath(logpath string) {
 	if logpath != "stdout" {
@@ -15,23 +26,23 @@ func SetUpLogPath(logpath string) {
 		if err != nil {
 			log.Fatalf("unable init logging: %v", err)
 		}
-		Log.SetOutput(file)
+		Instance().SetOutput(file)
 		defer file.Close()
 	}
 }
 
 func Error(msg string, cause string) {
-	Log.WithFields(logrus.Fields{
+	Instance().WithFields(logrus.Fields{
 		"cause": cause,
 	}).Error(msg)
 }
 
 func Info(msg string) {
-	Log.Info(msg)
+	Instance().Info(msg)
 }
 
 func Debug(msg string) {
-	Log.Debug(msg)
+	Instance().Debug(msg)
 }
 
 func Fatalf(format string, v ...any) {
