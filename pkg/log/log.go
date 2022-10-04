@@ -20,15 +20,16 @@ func Instance() *logrus.Logger {
 	return logger
 }
 
-func SetUpLogPath(logpath string) {
+func SetUpLogPath(logpath string) *os.File {
 	if logpath != "stdout" {
 		file, err := os.OpenFile(logpath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 		if err != nil {
 			log.Fatalf("unable init logging: %v", err)
 		}
 		Instance().SetOutput(file)
-		defer file.Close()
+		return file
 	}
+	return nil
 }
 
 func Error(msg string, cause string) {
