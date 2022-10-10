@@ -12,7 +12,7 @@ import (
 )
 
 type FeedPostDTO struct {
-	Id             int32
+	Uuid           string
 	AuthorId       int32
 	Text           string
 	PreviewText    string
@@ -23,9 +23,9 @@ type FeedPostDTO struct {
 }
 
 type FeedCommentDTO struct {
-	Id              int32
+	Uuid            string
 	AuthorId        int32
-	PostId          int32
+	PostUuid        string
 	LinkedCommentId int32
 	Text            string
 	State           string
@@ -113,7 +113,7 @@ func (s *FeedBuilderGRPCService) UpdatePost(post *FeedPostDTO) error {
 	return err
 }
 
-func (s *FeedBuilderGRPCService) DeletePost(postId int32) error {
+func (s *FeedBuilderGRPCService) DeletePost(postUuid string) error {
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
@@ -124,7 +124,7 @@ func (s *FeedBuilderGRPCService) DeletePost(postId int32) error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
-	_, err := s.client.DeletePost(ctx, &DeletePostRequest{Id: postId})
+	_, err := s.client.DeletePost(ctx, &DeletePostRequest{Uuid: postUuid})
 	return err
 }
 
@@ -158,7 +158,7 @@ func (s *FeedBuilderGRPCService) UpdateComment(comment *FeedCommentDTO) error {
 	return err
 }
 
-func (s *FeedBuilderGRPCService) DeleteComment(postId int32, commentId int32) error {
+func (s *FeedBuilderGRPCService) DeleteComment(postUuid string, commentUuid string) error {
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
@@ -169,7 +169,7 @@ func (s *FeedBuilderGRPCService) DeleteComment(postId int32, commentId int32) er
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
-	_, err := s.client.DeleteComment(ctx, &DeleteCommentRequest{CommentId: commentId, PostId: postId})
+	_, err := s.client.DeleteComment(ctx, &DeleteCommentRequest{Uuid: commentUuid, PostUuid: postUuid})
 	return err
 }
 func (s *FeedBuilderGRPCService) UpdateUser(user *FeedUserDTO) error {
@@ -189,7 +189,7 @@ func (s *FeedBuilderGRPCService) UpdateUser(user *FeedUserDTO) error {
 
 func toCreatePostRequest(post *FeedPostDTO) *CreatePostRequest {
 	return &CreatePostRequest{
-		Id:             post.Id,
+		Uuid:           post.Uuid,
 		AuthorId:       post.AuthorId,
 		Text:           post.Text,
 		PreviewText:    post.PreviewText,
@@ -202,7 +202,7 @@ func toCreatePostRequest(post *FeedPostDTO) *CreatePostRequest {
 
 func toUpdatePostRequest(post *FeedPostDTO) *UpdatePostRequest {
 	return &UpdatePostRequest{
-		Id:             post.Id,
+		Uuid:           post.Uuid,
 		AuthorId:       post.AuthorId,
 		Text:           post.Text,
 		PreviewText:    post.PreviewText,
@@ -215,9 +215,9 @@ func toUpdatePostRequest(post *FeedPostDTO) *UpdatePostRequest {
 
 func toCreateCommentRequest(comment *FeedCommentDTO) *CreateCommentRequest {
 	return &CreateCommentRequest{
-		Id:              comment.Id,
+		Uuid:            comment.Uuid,
 		AuthorId:        comment.AuthorId,
-		PostId:          comment.PostId,
+		PostUuid:        comment.PostUuid,
 		LinkedCommentId: comment.LinkedCommentId,
 		Text:            comment.Text,
 		State:           comment.State,
@@ -228,9 +228,9 @@ func toCreateCommentRequest(comment *FeedCommentDTO) *CreateCommentRequest {
 
 func toUpdateCommentRequest(comment *FeedCommentDTO) *UpdateCommentRequest {
 	return &UpdateCommentRequest{
-		Id:              comment.Id,
+		Uuid:            comment.Uuid,
 		AuthorId:        comment.AuthorId,
-		PostId:          comment.PostId,
+		PostUuid:        comment.PostUuid,
 		LinkedCommentId: comment.LinkedCommentId,
 		Text:            comment.Text,
 		State:           comment.State,

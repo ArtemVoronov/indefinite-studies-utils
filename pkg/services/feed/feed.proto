@@ -17,7 +17,7 @@ service FeedBuilderService {
 }
 
 message CreatePostRequest {
-  int32 id = 1;
+  string uuid = 1;
   int32 authorId = 2;
   string text = 3;
   string previewText = 4;
@@ -31,7 +31,7 @@ message CreatePostReply {
 }
 
 message UpdatePostRequest {
-  int32 id = 1;
+  string uuid = 1;
   int32 authorId = 2;
   string text = 3;
   string previewText = 4;
@@ -45,43 +45,43 @@ message UpdatePostReply {
 }
 
 message DeletePostRequest {
-  int32 id = 1;
+  string uuid = 1;
 }
 
 message DeletePostReply {
 }
 
 message CreateCommentRequest {
-  int32 id = 1;
+  string uuid = 1;
   int32 authorId = 2;
-  int32 postId = 3;
-  int32 linkedCommentId = 5;
-  string text = 6;
-  string state = 7;
-  google.protobuf.Timestamp createDate = 8;
-  google.protobuf.Timestamp lastUpdateDate = 9;
+  string postUuid = 3;
+  int32 linkedCommentId = 4;
+  string text = 5;
+  string state = 6;
+  google.protobuf.Timestamp createDate = 7;
+  google.protobuf.Timestamp lastUpdateDate = 8;
 }
 
 message CreateCommentReply {
 }
 
 message UpdateCommentRequest {
-  int32 id = 1;
+  string uuid = 1;
   int32 authorId = 2;
-  int32 postId = 3;
-  int32 linkedCommentId = 5;
-  string text = 6;
-  string state = 7;
-  google.protobuf.Timestamp createDate = 8;
-  google.protobuf.Timestamp lastUpdateDate = 9;
+  string postUuid = 3;
+  int32 linkedCommentId = 4;
+  string text = 5;
+  string state = 6;
+  google.protobuf.Timestamp createDate = 7;
+  google.protobuf.Timestamp lastUpdateDate = 8;
 }
 
 message UpdateCommentReply {
 }
 
 message DeleteCommentRequest {
-  int32 commentId = 1;
-  int32 postId = 2;
+  string uuid = 1;
+  string postUuid = 2;
 }
 
 message DeleteCommentReply {

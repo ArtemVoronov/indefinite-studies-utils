@@ -13,7 +13,7 @@ import (
 )
 
 type GetPostResult struct {
-	Id             int
+	Uuid           string
 	AuthorId       int
 	Text           string
 	PreviewText    string
@@ -24,9 +24,9 @@ type GetPostResult struct {
 }
 
 type GetCommentResult struct {
-	Id              int
+	Uuid            string
 	AuthorId        int
-	PostId          int
+	PostUuid        string
 	LinkedCommentId *int
 	Text            string
 	State           string
@@ -74,7 +74,7 @@ func (s *PostsGRPCService) Shutdown() error {
 	return nil
 }
 
-func (s *PostsGRPCService) GetPost(postId int32) (*GetPostResult, error) {
+func (s *PostsGRPCService) GetPost(postUuid string) (*GetPostResult, error) {
 	var result *GetPostResult
 	if s.connection == nil {
 		err := s.connect()
@@ -86,13 +86,13 @@ func (s *PostsGRPCService) GetPost(postId int32) (*GetPostResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
-	reply, err := s.client.GetPost(ctx, &GetPostRequest{Id: postId})
+	reply, err := s.client.GetPost(ctx, &GetPostRequest{Uuid: postUuid})
 	if err != nil {
 		return result, fmt.Errorf("could not GetPost: %v", err)
 	}
 
 	result = &GetPostResult{
-		Id:             int(reply.GetId()),
+		Uuid:           reply.GetUuid(),
 		AuthorId:       int(reply.GetAuthorId()),
 		Text:           reply.GetText(),
 		PreviewText:    reply.GetPreviewText(),
@@ -105,7 +105,7 @@ func (s *PostsGRPCService) GetPost(postId int32) (*GetPostResult, error) {
 	return result, nil
 }
 
-func (s *PostsGRPCService) GetPosts(offset int32, limit int32, userIds []int32) ([]GetPostResult, error) {
+func (s *PostsGRPCService) GetPosts(offset int32, limit int32) ([]GetPostResult, error) {
 	var result []GetPostResult
 	if s.connection == nil {
 		err := s.connect()
@@ -117,7 +117,7 @@ func (s *PostsGRPCService) GetPosts(offset int32, limit int32, userIds []int32) 
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
-	reply, err := s.client.GetPosts(ctx, &GetPostsRequest{Offset: offset, Limit: limit, Ids: userIds})
+	reply, err := s.client.GetPosts(ctx, &GetPostsRequest{Offset: offset, Limit: limit})
 	if err != nil {
 		return result, fmt.Errorf("could not GetPosts: %v", err)
 	}
@@ -126,7 +126,7 @@ func (s *PostsGRPCService) GetPosts(offset int32, limit int32, userIds []int32) 
 
 	for _, postPtr := range posts {
 		result = append(result, GetPostResult{
-			Id:             int(postPtr.GetId()),
+			Uuid:           postPtr.GetUuid(),
 			AuthorId:       int(postPtr.GetAuthorId()),
 			Text:           postPtr.GetText(),
 			PreviewText:    postPtr.GetPreviewText(),
@@ -140,7 +140,7 @@ func (s *PostsGRPCService) GetPosts(offset int32, limit int32, userIds []int32) 
 	return result, nil
 }
 
-func (s *PostsGRPCService) GetPostsStream(userIds []int32) (<-chan (GetPostResult), error) {
+func (s *PostsGRPCService) GetPostsStream(postUuids []string) (<-chan (GetPostResult), error) {
 	var result chan (GetPostResult) = make(chan GetPostResult)
 	var resultErr error
 	if s.connection == nil {
@@ -174,7 +174,7 @@ func (s *PostsGRPCService) GetPostsStream(userIds []int32) (<-chan (GetPostResul
 				return
 			}
 			result <- GetPostResult{
-				Id:             int(in.GetId()),
+				Uuid:           in.GetUuid(),
 				AuthorId:       int(in.GetAuthorId()),
 				Text:           in.GetText(),
 				PreviewText:    in.GetPreviewText(),
@@ -185,17 +185,17 @@ func (s *PostsGRPCService) GetPostsStream(userIds []int32) (<-chan (GetPostResul
 			}
 		}
 	}()
-	for _, userId := range userIds {
-		err := stream.Send(&GetPostRequest{Id: userId})
+	for _, postUuid := range postUuids {
+		err := stream.Send(&GetPostRequest{Uuid: postUuid})
 		if err != nil {
-			resultErr = fmt.Errorf("s.client.GetPostsStream: stream.Send(%v) failed: %v", userId, err)
+			resultErr = fmt.Errorf("s.client.GetPostsStream: stream.Send(%v) failed: %v", postUuid, err)
 			return result, resultErr
 		}
 	}
 	return result, resultErr
 }
 
-func (s *PostsGRPCService) GetComment(postId int32) (*GetCommentResult, error) {
+func (s *PostsGRPCService) GetComment(postUuid string, commentUuid string) (*GetCommentResult, error) {
 	var result *GetCommentResult
 	if s.connection == nil {
 		err := s.connect()
@@ -207,15 +207,15 @@ func (s *PostsGRPCService) GetComment(postId int32) (*GetCommentResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
-	reply, err := s.client.GetComment(ctx, &GetCommentRequest{Id: postId})
+	reply, err := s.client.GetComment(ctx, &GetCommentRequest{PostUuid: postUuid, Uuid: commentUuid})
 	if err != nil {
 		return result, fmt.Errorf("could not GetComment: %v", err)
 	}
 
 	result = &GetCommentResult{
-		Id:              int(reply.GetId()),
+		Uuid:            reply.GetUuid(),
 		AuthorId:        int(reply.GetAuthorId()),
-		PostId:          int(reply.GetPostId()),
+		PostUuid:        reply.GetPostUuid(),
 		LinkedCommentId: utils.Int32ToIntPtr(reply.GetLinkedCommentId()),
 		Text:            reply.GetText(),
 		State:           reply.GetState(),
@@ -226,7 +226,7 @@ func (s *PostsGRPCService) GetComment(postId int32) (*GetCommentResult, error) {
 	return result, nil
 }
 
-func (s *PostsGRPCService) GetComments(postId int32, offset int32, limit int32) ([]GetCommentResult, error) {
+func (s *PostsGRPCService) GetComments(postUuid string, offset int32, limit int32) ([]GetCommentResult, error) {
 	var result []GetCommentResult
 	if s.connection == nil {
 		err := s.connect()
@@ -238,7 +238,7 @@ func (s *PostsGRPCService) GetComments(postId int32, offset int32, limit int32) 
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
-	reply, err := s.client.GetComments(ctx, &GetCommentsRequest{PostId: postId, Offset: offset, Limit: limit})
+	reply, err := s.client.GetComments(ctx, &GetCommentsRequest{PostUuid: postUuid, Offset: offset, Limit: limit})
 	if err != nil {
 		return result, fmt.Errorf("could not GetComments: %v", err)
 	}
@@ -247,9 +247,9 @@ func (s *PostsGRPCService) GetComments(postId int32, offset int32, limit int32) 
 
 	for _, commentPtr := range comments {
 		result = append(result, GetCommentResult{
-			Id:              int(commentPtr.GetId()),
+			Uuid:            commentPtr.GetUuid(),
 			AuthorId:        int(commentPtr.GetAuthorId()),
-			PostId:          int(commentPtr.GetPostId()),
+			PostUuid:        commentPtr.GetPostUuid(),
 			LinkedCommentId: utils.Int32ToIntPtr(commentPtr.GetLinkedCommentId()),
 			Text:            commentPtr.GetText(),
 			State:           commentPtr.GetState(),
@@ -261,7 +261,7 @@ func (s *PostsGRPCService) GetComments(postId int32, offset int32, limit int32) 
 	return result, nil
 }
 
-func (s *PostsGRPCService) GetCommentsStream(userIds []int32) (<-chan (GetCommentResult), error) {
+func (s *PostsGRPCService) GetCommentsStream(postUuid string, commentsUuids []string) (<-chan (GetCommentResult), error) {
 	var result chan (GetCommentResult) = make(chan GetCommentResult)
 	var resultErr error
 	if s.connection == nil {
@@ -295,9 +295,9 @@ func (s *PostsGRPCService) GetCommentsStream(userIds []int32) (<-chan (GetCommen
 				return
 			}
 			result <- GetCommentResult{
-				Id:              int(in.GetId()),
+				Uuid:            in.GetUuid(),
 				AuthorId:        int(in.GetAuthorId()),
-				PostId:          int(in.GetPostId()),
+				PostUuid:        in.GetPostUuid(),
 				LinkedCommentId: utils.Int32ToIntPtr(in.GetLinkedCommentId()),
 				Text:            in.GetText(),
 				State:           in.GetState(),
@@ -306,10 +306,10 @@ func (s *PostsGRPCService) GetCommentsStream(userIds []int32) (<-chan (GetCommen
 			}
 		}
 	}()
-	for _, userId := range userIds {
-		err := stream.Send(&GetCommentRequest{Id: userId})
+	for _, commentUuid := range commentsUuids {
+		err := stream.Send(&GetCommentRequest{PostUuid: postUuid, Uuid: commentUuid})
 		if err != nil {
-			resultErr = fmt.Errorf("s.client.GetCommentsStream: stream.Send(%v) failed: %v", userId, err)
+			resultErr = fmt.Errorf("s.client.GetCommentsStream: stream.Send({postUuid: '%v', commentUuid: '%v'}) failed: %v", postUuid, commentUuid, err)
 			return result, resultErr
 		}
 	}

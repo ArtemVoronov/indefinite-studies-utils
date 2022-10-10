@@ -16,11 +16,11 @@ service PostsService {
 }
 
 message GetPostRequest {
-  int32 id = 1;
+  string uuid = 1;
 }
 
 message GetPostReply {
-  int32 id = 1;
+  string uuid = 1;
   int32 authorId = 2;
   string text = 3;
   string previewText = 4;
@@ -33,7 +33,6 @@ message GetPostReply {
 message GetPostsRequest {
   int32 offset = 1;
   int32 limit = 2;
-  repeated int32 ids = 3 [packed=true];
 }
 
 message GetPostsReply {
@@ -44,22 +43,23 @@ message GetPostsReply {
 }
 
 message GetCommentRequest {
-  int32 id = 1;
+  string uuid = 1;
+  string postUuid = 2;
 }
 
 message GetCommentReply {
-  int32 id = 1;
+  string uuid = 1;
   int32 authorId = 2;
-  int32 postId = 3;
-  int32 linkedCommentId = 5;
-  string text = 6;
-  string state = 7;
-  google.protobuf.Timestamp createDate = 8;
-  google.protobuf.Timestamp lastUpdateDate = 9;
+  string postUuid = 3;
+  int32 linkedCommentId = 4;
+  string text = 5;
+  string state = 6;
+  google.protobuf.Timestamp createDate = 7;
+  google.protobuf.Timestamp lastUpdateDate = 8;
 }
 
 message GetCommentsRequest {  
-  int32 postId = 1;
+  string postUuid = 1;
   int32 offset = 2;
   int32 limit = 3;
 }
