@@ -24,6 +24,7 @@ type GetPostResult struct {
 }
 
 type GetCommentResult struct {
+	Id              int
 	Uuid            string
 	AuthorId        int
 	PostUuid        string
@@ -195,7 +196,7 @@ func (s *PostsGRPCService) GetPostsStream(postUuids []string) (<-chan (GetPostRe
 	return result, resultErr
 }
 
-func (s *PostsGRPCService) GetComment(postUuid string, commenid int32) (*GetCommentResult, error) {
+func (s *PostsGRPCService) GetComment(postUuid string, commentid int32) (*GetCommentResult, error) {
 	var result *GetCommentResult
 	if s.connection == nil {
 		err := s.connect()
@@ -207,12 +208,13 @@ func (s *PostsGRPCService) GetComment(postUuid string, commenid int32) (*GetComm
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
-	reply, err := s.client.GetComment(ctx, &GetCommentRequest{PostUuid: postUuid, Id: commenid})
+	reply, err := s.client.GetComment(ctx, &GetCommentRequest{PostUuid: postUuid, Id: commentid})
 	if err != nil {
 		return result, fmt.Errorf("could not GetComment: %v", err)
 	}
 
 	result = &GetCommentResult{
+		Id:              int(reply.GetId()),
 		Uuid:            reply.GetUuid(),
 		AuthorId:        int(reply.GetAuthorId()),
 		PostUuid:        reply.GetPostUuid(),
@@ -247,6 +249,7 @@ func (s *PostsGRPCService) GetComments(postUuid string, offset int32, limit int3
 
 	for _, commentPtr := range comments {
 		result = append(result, GetCommentResult{
+			Id:              int(commentPtr.GetId()),
 			Uuid:            commentPtr.GetUuid(),
 			AuthorId:        int(commentPtr.GetAuthorId()),
 			PostUuid:        commentPtr.GetPostUuid(),
@@ -295,6 +298,7 @@ func (s *PostsGRPCService) GetCommentsStream(postUuid string, commentIds []int32
 				return
 			}
 			result <- GetCommentResult{
+				Id:              int(in.GetId()),
 				Uuid:            in.GetUuid(),
 				AuthorId:        int(in.GetAuthorId()),
 				PostUuid:        in.GetPostUuid(),
