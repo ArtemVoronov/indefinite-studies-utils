@@ -23,6 +23,7 @@ type FeedPostDTO struct {
 }
 
 type FeedCommentDTO struct {
+	Id              int32
 	Uuid            string
 	AuthorId        int32
 	PostUuid        string
@@ -215,6 +216,7 @@ func toUpdatePostRequest(post *FeedPostDTO) *UpdatePostRequest {
 
 func toCreateCommentRequest(comment *FeedCommentDTO) *CreateCommentRequest {
 	return &CreateCommentRequest{
+		Id:              int32(comment.Id),
 		Uuid:            comment.Uuid,
 		AuthorId:        comment.AuthorId,
 		PostUuid:        comment.PostUuid,
@@ -228,6 +230,7 @@ func toCreateCommentRequest(comment *FeedCommentDTO) *CreateCommentRequest {
 
 func toUpdateCommentRequest(comment *FeedCommentDTO) *UpdateCommentRequest {
 	return &UpdateCommentRequest{
+		Id:              int32(comment.Id),
 		Uuid:            comment.Uuid,
 		AuthorId:        comment.AuthorId,
 		PostUuid:        comment.PostUuid,
