@@ -13,12 +13,12 @@ import (
 )
 
 type DBParams struct {
-	host         string
-	port         string
-	username     string
-	password     string
-	databaseName string
-	sslMode      string
+	Host         string
+	Port         string
+	Username     string
+	Password     string
+	DatabaseName string
+	SslMode      string
 }
 
 type PostgreSQLService struct {
@@ -96,12 +96,12 @@ func (s *PostgreSQLService) TxVoid(f SqlQueryFuncVoid) func() error {
 
 func createClientDefault() *sql.DB {
 	defaultParams := &DBParams{
-		host:         utils.EnvVar("DATABASE_HOST"),
-		port:         utils.EnvVar("DATABASE_PORT"),
-		username:     utils.EnvVar("DATABASE_USER"),
-		password:     utils.EnvVar("DATABASE_PASSWORD"),
-		databaseName: utils.EnvVar("DATABASE_NAME"),
-		sslMode:      utils.EnvVar("DATABASE_SSL_MODE"),
+		Host:         utils.EnvVar("DATABASE_HOST"),
+		Port:         utils.EnvVar("DATABASE_PORT"),
+		Username:     utils.EnvVar("DATABASE_USER"),
+		Password:     utils.EnvVar("DATABASE_PASSWORD"),
+		DatabaseName: utils.EnvVar("DATABASE_NAME"),
+		SslMode:      utils.EnvVar("DATABASE_SSL_MODE"),
 	}
 
 	return createClient(defaultParams)
@@ -109,16 +109,16 @@ func createClientDefault() *sql.DB {
 
 func createClient(params *DBParams) *sql.DB {
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		params.host,
-		params.port,
-		params.username,
-		params.password,
-		params.databaseName,
-		params.sslMode,
+		params.Host,
+		params.Port,
+		params.Username,
+		params.Password,
+		params.DatabaseName,
+		params.SslMode,
 	)
 	result, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
-		log.Fatalf("Unable to open connection to database: %s. Error: %s", params.databaseName, err)
+		log.Fatalf("Unable to open connection to database: %s. Error: %s", params.DatabaseName, err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -126,7 +126,7 @@ func createClient(params *DBParams) *sql.DB {
 
 	err = result.PingContext(ctx)
 	if err != nil {
-		log.Fatalf("Unable to connect to database: %s. Error: %s", params.databaseName, err)
+		log.Fatalf("Unable to connect to database: %s. Error: %s", params.DatabaseName, err)
 	}
 
 	return result
