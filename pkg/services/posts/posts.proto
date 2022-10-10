@@ -43,19 +43,20 @@ message GetPostsReply {
 }
 
 message GetCommentRequest {
-  string uuid = 1;
+  int32 id = 1;
   string postUuid = 2;
 }
 
 message GetCommentReply {
-  string uuid = 1;
-  int32 authorId = 2;
-  string postUuid = 3;
-  int32 linkedCommentId = 4;
-  string text = 5;
-  string state = 6;
-  google.protobuf.Timestamp createDate = 7;
-  google.protobuf.Timestamp lastUpdateDate = 8;
+  int32 id = 1;
+  string uuid = 2;
+  int32 authorId = 3;
+  string postUuid = 4;
+  int32 linkedCommentId = 5;
+  string text = 6;
+  string state = 7;
+  google.protobuf.Timestamp createDate = 8;
+  google.protobuf.Timestamp lastUpdateDate = 9;
 }
 
 message GetCommentsRequest {  

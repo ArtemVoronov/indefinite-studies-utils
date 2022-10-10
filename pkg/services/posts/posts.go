@@ -195,7 +195,7 @@ func (s *PostsGRPCService) GetPostsStream(postUuids []string) (<-chan (GetPostRe
 	return result, resultErr
 }
 
-func (s *PostsGRPCService) GetComment(postUuid string, commentUuid string) (*GetCommentResult, error) {
+func (s *PostsGRPCService) GetComment(postUuid string, commenid int32) (*GetCommentResult, error) {
 	var result *GetCommentResult
 	if s.connection == nil {
 		err := s.connect()
@@ -207,7 +207,7 @@ func (s *PostsGRPCService) GetComment(postUuid string, commentUuid string) (*Get
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
-	reply, err := s.client.GetComment(ctx, &GetCommentRequest{PostUuid: postUuid, Uuid: commentUuid})
+	reply, err := s.client.GetComment(ctx, &GetCommentRequest{PostUuid: postUuid, Id: commenid})
 	if err != nil {
 		return result, fmt.Errorf("could not GetComment: %v", err)
 	}
@@ -261,7 +261,7 @@ func (s *PostsGRPCService) GetComments(postUuid string, offset int32, limit int3
 	return result, nil
 }
 
-func (s *PostsGRPCService) GetCommentsStream(postUuid string, commentsUuids []string) (<-chan (GetCommentResult), error) {
+func (s *PostsGRPCService) GetCommentsStream(postUuid string, commentIds []int32) (<-chan (GetCommentResult), error) {
 	var result chan (GetCommentResult) = make(chan GetCommentResult)
 	var resultErr error
 	if s.connection == nil {
@@ -306,10 +306,10 @@ func (s *PostsGRPCService) GetCommentsStream(postUuid string, commentsUuids []st
 			}
 		}
 	}()
-	for _, commentUuid := range commentsUuids {
-		err := stream.Send(&GetCommentRequest{PostUuid: postUuid, Uuid: commentUuid})
+	for _, commentId := range commentIds {
+		err := stream.Send(&GetCommentRequest{PostUuid: postUuid, Id: commentId})
 		if err != nil {
-			resultErr = fmt.Errorf("s.client.GetCommentsStream: stream.Send({postUuid: '%v', commentUuid: '%v'}) failed: %v", postUuid, commentUuid, err)
+			resultErr = fmt.Errorf("s.client.GetCommentsStream: stream.Send({postUuid: '%v', commentId: '%v'}) failed: %v", postUuid, commentId, err)
 			return result, resultErr
 		}
 	}
