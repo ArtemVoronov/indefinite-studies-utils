@@ -12,6 +12,15 @@ import (
 	_ "github.com/lib/pq"
 )
 
+type DBParams struct {
+	host         string
+	port         string
+	username     string
+	password     string
+	databaseName string
+	sslMode      string
+}
+
 type PostgreSQLService struct {
 	client       *sql.DB
 	queryTimeout time.Duration
@@ -21,9 +30,16 @@ type SqlQueryFunc func(transaction *sql.Tx, ctx context.Context, cancel context.
 
 type SqlQueryFuncVoid func(transaction *sql.Tx, ctx context.Context, cancel context.CancelFunc) error
 
-func CreatePostgreSQLService() *PostgreSQLService {
+func CreatePostgreSQLServiceDefault() *PostgreSQLService {
 	return &PostgreSQLService{
-		client:       createClient(),
+		client:       createClientDefault(),
+		queryTimeout: queryTimeout(),
+	}
+}
+
+func CreatePostgreSQLService(params *DBParams) *PostgreSQLService {
+	return &PostgreSQLService{
+		client:       createClient(params),
 		queryTimeout: queryTimeout(),
 	}
 }
@@ -78,18 +94,31 @@ func (s *PostgreSQLService) TxVoid(f SqlQueryFuncVoid) func() error {
 	}
 }
 
-func createClient() *sql.DB {
-	dbEnvVars := [6]string{"DATABASE_HOST", "DATABASE_PORT", "DATABASE_USER", "DATABASE_PASSWORD", "DATABASE_NAME", "DATABASE_SSL_MODE"}
-	var variables []string
-	for _, element := range dbEnvVars {
-		value := utils.EnvVar(element)
-		variables = append(variables, value)
+func createClientDefault() *sql.DB {
+	defaultParams := &DBParams{
+		host:         utils.EnvVar("DATABASE_HOST"),
+		port:         utils.EnvVar("DATABASE_PORT"),
+		username:     utils.EnvVar("DATABASE_USER"),
+		password:     utils.EnvVar("DATABASE_PASSWORD"),
+		databaseName: utils.EnvVar("DATABASE_NAME"),
+		sslMode:      utils.EnvVar("DATABASE_SSL_MODE"),
 	}
 
-	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", variables[0], variables[1], variables[2], variables[3], variables[4], variables[5])
+	return createClient(defaultParams)
+}
+
+func createClient(params *DBParams) *sql.DB {
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		params.host,
+		params.port,
+		params.username,
+		params.password,
+		params.databaseName,
+		params.sslMode,
+	)
 	result, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
-		log.Fatalf("Unable to open connection to database: %s. Error: %s", variables[4], err)
+		log.Fatalf("Unable to open connection to database: %s. Error: %s", params.databaseName, err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -97,7 +126,7 @@ func createClient() *sql.DB {
 
 	err = result.PingContext(ctx)
 	if err != nil {
-		log.Fatalf("Unable to connect to database: %s. Error: %s", variables[4], err)
+		log.Fatalf("Unable to connect to database: %s. Error: %s", params.databaseName, err)
 	}
 
 	return result
