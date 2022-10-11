@@ -76,11 +76,10 @@ func (s *PostsGRPCService) Shutdown() error {
 }
 
 func (s *PostsGRPCService) GetPost(postUuid string) (*GetPostResult, error) {
-	var result *GetPostResult
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return result, fmt.Errorf("could not GetPost: %v", err)
+			return nil, fmt.Errorf("could not GetPost: %v", err)
 		}
 	}
 
@@ -89,21 +88,12 @@ func (s *PostsGRPCService) GetPost(postUuid string) (*GetPostResult, error) {
 
 	reply, err := s.client.GetPost(ctx, &GetPostRequest{Uuid: postUuid})
 	if err != nil {
-		return result, fmt.Errorf("could not GetPost: %v", err)
+		return nil, fmt.Errorf("could not GetPost: %v", err)
 	}
 
-	result = &GetPostResult{
-		Uuid:           reply.GetUuid(),
-		AuthorId:       int(reply.GetAuthorId()),
-		Text:           reply.GetText(),
-		PreviewText:    reply.GetPreviewText(),
-		Topic:          reply.GetTopic(),
-		State:          reply.GetState(),
-		CreateDate:     reply.GetCreateDate().AsTime(),
-		LastUpdateDate: reply.GetLastUpdateDate().AsTime(),
-	}
+	result := ToGetPostsResult(reply)
 
-	return result, nil
+	return &result, nil
 }
 
 func (s *PostsGRPCService) GetPosts(offset int32, limit int32, shard int32) (*GetPostsReply, error) {
@@ -121,6 +111,7 @@ func (s *PostsGRPCService) GetPosts(offset int32, limit int32, shard int32) (*Ge
 	if err != nil {
 		return nil, fmt.Errorf("could not GetPosts: %v", err)
 	}
+	reply.GetPosts()
 	return reply, nil
 }
 
@@ -157,16 +148,7 @@ func (s *PostsGRPCService) GetPostsStream(postUuids []string) (<-chan (GetPostRe
 				resultErr = fmt.Errorf("s.client.GetPostsStream: stream.Recv failed: %v", err)
 				return
 			}
-			result <- GetPostResult{
-				Uuid:           in.GetUuid(),
-				AuthorId:       int(in.GetAuthorId()),
-				Text:           in.GetText(),
-				PreviewText:    in.GetPreviewText(),
-				Topic:          in.GetTopic(),
-				State:          in.GetState(),
-				CreateDate:     in.GetCreateDate().AsTime(),
-				LastUpdateDate: in.GetLastUpdateDate().AsTime(),
-			}
+			result <- ToGetPostsResult(in)
 		}
 	}()
 	for _, postUuid := range postUuids {
@@ -180,11 +162,10 @@ func (s *PostsGRPCService) GetPostsStream(postUuids []string) (<-chan (GetPostRe
 }
 
 func (s *PostsGRPCService) GetComment(postUuid string, commentid int32) (*GetCommentResult, error) {
-	var result *GetCommentResult
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return result, fmt.Errorf("could not GetComment: %v", err)
+			return nil, fmt.Errorf("could not GetComment: %v", err)
 		}
 	}
 
@@ -193,22 +174,12 @@ func (s *PostsGRPCService) GetComment(postUuid string, commentid int32) (*GetCom
 
 	reply, err := s.client.GetComment(ctx, &GetCommentRequest{PostUuid: postUuid, Id: commentid})
 	if err != nil {
-		return result, fmt.Errorf("could not GetComment: %v", err)
+		return nil, fmt.Errorf("could not GetComment: %v", err)
 	}
 
-	result = &GetCommentResult{
-		Id:              int(reply.GetId()),
-		Uuid:            reply.GetUuid(),
-		AuthorId:        int(reply.GetAuthorId()),
-		PostUuid:        reply.GetPostUuid(),
-		LinkedCommentId: utils.Int32ToIntPtr(reply.GetLinkedCommentId()),
-		Text:            reply.GetText(),
-		State:           reply.GetState(),
-		CreateDate:      reply.GetCreateDate().AsTime(),
-		LastUpdateDate:  reply.GetLastUpdateDate().AsTime(),
-	}
+	result := ToGetCommentResult(reply)
 
-	return result, nil
+	return &result, nil
 }
 
 func (s *PostsGRPCService) GetComments(postUuid string, offset int32, limit int32) ([]GetCommentResult, error) {
@@ -231,17 +202,7 @@ func (s *PostsGRPCService) GetComments(postUuid string, offset int32, limit int3
 	comments := reply.GetComments()
 
 	for _, commentPtr := range comments {
-		result = append(result, GetCommentResult{
-			Id:              int(commentPtr.GetId()),
-			Uuid:            commentPtr.GetUuid(),
-			AuthorId:        int(commentPtr.GetAuthorId()),
-			PostUuid:        commentPtr.GetPostUuid(),
-			LinkedCommentId: utils.Int32ToIntPtr(commentPtr.GetLinkedCommentId()),
-			Text:            commentPtr.GetText(),
-			State:           commentPtr.GetState(),
-			CreateDate:      commentPtr.GetCreateDate().AsTime(),
-			LastUpdateDate:  commentPtr.GetLastUpdateDate().AsTime(),
-		})
+		result = append(result, ToGetCommentResult(commentPtr))
 	}
 
 	return result, nil
@@ -280,17 +241,7 @@ func (s *PostsGRPCService) GetCommentsStream(postUuid string, commentIds []int32
 				resultErr = fmt.Errorf("s.client.GetCommentsStream: stream.Recv failed: %v", err)
 				return
 			}
-			result <- GetCommentResult{
-				Id:              int(in.GetId()),
-				Uuid:            in.GetUuid(),
-				AuthorId:        int(in.GetAuthorId()),
-				PostUuid:        in.GetPostUuid(),
-				LinkedCommentId: utils.Int32ToIntPtr(in.GetLinkedCommentId()),
-				Text:            in.GetText(),
-				State:           in.GetState(),
-				CreateDate:      in.GetCreateDate().AsTime(),
-				LastUpdateDate:  in.GetLastUpdateDate().AsTime(),
-			}
+			result <- ToGetCommentResult(in)
 		}
 	}()
 	for _, commentId := range commentIds {
@@ -301,4 +252,31 @@ func (s *PostsGRPCService) GetCommentsStream(postUuid string, commentIds []int32
 		}
 	}
 	return result, resultErr
+}
+
+func ToGetPostsResult(post *GetPostReply) GetPostResult {
+	return GetPostResult{
+		Uuid:           post.GetUuid(),
+		AuthorId:       int(post.GetAuthorId()),
+		Text:           post.GetText(),
+		PreviewText:    post.GetPreviewText(),
+		Topic:          post.GetTopic(),
+		State:          post.GetState(),
+		CreateDate:     post.GetCreateDate().AsTime(),
+		LastUpdateDate: post.GetLastUpdateDate().AsTime(),
+	}
+}
+
+func ToGetCommentResult(comment *GetCommentReply) GetCommentResult {
+	return GetCommentResult{
+		Id:              int(comment.GetId()),
+		Uuid:            comment.GetUuid(),
+		AuthorId:        int(comment.GetAuthorId()),
+		PostUuid:        comment.GetPostUuid(),
+		LinkedCommentId: utils.Int32ToIntPtr(comment.GetLinkedCommentId()),
+		Text:            comment.GetText(),
+		State:           comment.GetState(),
+		CreateDate:      comment.GetCreateDate().AsTime(),
+		LastUpdateDate:  comment.GetLastUpdateDate().AsTime(),
+	}
 }
