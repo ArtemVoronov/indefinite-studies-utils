@@ -281,7 +281,7 @@ func ToGetCommentResult(comment *GetCommentReply) GetCommentResult {
 }
 
 func ToGetPostsResultSlice(posts []*GetPostReply) []GetPostResult {
-	result := make([]GetPostResult, len(posts))
+	result := []GetPostResult{}
 
 	for _, p := range posts {
 		result = append(result, ToGetPostsResult(p))
