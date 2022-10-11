@@ -106,12 +106,11 @@ func (s *PostsGRPCService) GetPost(postUuid string) (*GetPostResult, error) {
 	return result, nil
 }
 
-func (s *PostsGRPCService) GetPosts(offset int32, limit int32, shard int32) ([]GetPostResult, error) {
-	var result []GetPostResult
+func (s *PostsGRPCService) GetPosts(offset int32, limit int32, shard int32) (*GetPostsReply, error) {
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return result, fmt.Errorf("could not GetPosts: %v", err)
+			return nil, fmt.Errorf("could not GetPosts: %v", err)
 		}
 	}
 
@@ -120,25 +119,9 @@ func (s *PostsGRPCService) GetPosts(offset int32, limit int32, shard int32) ([]G
 
 	reply, err := s.client.GetPosts(ctx, &GetPostsRequest{Offset: offset, Limit: limit, Shard: shard})
 	if err != nil {
-		return result, fmt.Errorf("could not GetPosts: %v", err)
+		return nil, fmt.Errorf("could not GetPosts: %v", err)
 	}
-
-	posts := reply.GetPosts()
-
-	for _, postPtr := range posts {
-		result = append(result, GetPostResult{
-			Uuid:           postPtr.GetUuid(),
-			AuthorId:       int(postPtr.GetAuthorId()),
-			Text:           postPtr.GetText(),
-			PreviewText:    postPtr.GetPreviewText(),
-			Topic:          postPtr.GetTopic(),
-			State:          postPtr.GetState(),
-			CreateDate:     postPtr.GetCreateDate().AsTime(),
-			LastUpdateDate: postPtr.GetLastUpdateDate().AsTime(),
-		})
-	}
-
-	return result, nil
+	return reply, nil
 }
 
 func (s *PostsGRPCService) GetPostsStream(postUuids []string) (<-chan (GetPostResult), error) {
