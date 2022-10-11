@@ -111,7 +111,6 @@ func (s *PostsGRPCService) GetPosts(offset int32, limit int32, shard int32) (*Ge
 	if err != nil {
 		return nil, fmt.Errorf("could not GetPosts: %v", err)
 	}
-	reply.GetPosts()
 	return reply, nil
 }
 
@@ -279,4 +278,14 @@ func ToGetCommentResult(comment *GetCommentReply) GetCommentResult {
 		CreateDate:      comment.GetCreateDate().AsTime(),
 		LastUpdateDate:  comment.GetLastUpdateDate().AsTime(),
 	}
+}
+
+func ToGetPostsResultSlice(posts []*GetPostReply) []GetPostResult {
+	result := make([]GetPostResult, len(posts))
+
+	for _, p := range posts {
+		result = append(result, ToGetPostsResult(p))
+	}
+
+	return result
 }
