@@ -106,7 +106,7 @@ func (s *PostsGRPCService) GetPost(postUuid string) (*GetPostResult, error) {
 	return result, nil
 }
 
-func (s *PostsGRPCService) GetPosts(offset int32, limit int32) ([]GetPostResult, error) {
+func (s *PostsGRPCService) GetPosts(offset int32, limit int32, shard int32) ([]GetPostResult, error) {
 	var result []GetPostResult
 	if s.connection == nil {
 		err := s.connect()
@@ -118,7 +118,7 @@ func (s *PostsGRPCService) GetPosts(offset int32, limit int32) ([]GetPostResult,
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
-	reply, err := s.client.GetPosts(ctx, &GetPostsRequest{Offset: offset, Limit: limit})
+	reply, err := s.client.GetPosts(ctx, &GetPostsRequest{Offset: offset, Limit: limit, Shard: shard})
 	if err != nil {
 		return result, fmt.Errorf("could not GetPosts: %v", err)
 	}

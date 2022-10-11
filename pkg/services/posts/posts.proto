@@ -33,13 +33,15 @@ message GetPostReply {
 message GetPostsRequest {
   int32 offset = 1;
   int32 limit = 2;
+  int32 shard = 3;
 }
 
 message GetPostsReply {
   int32 count = 1;
   int32 offset = 2;
   int32 limit = 3;
-  repeated GetPostReply posts = 4;
+  int32 shardsCount = 4;
+  repeated GetPostReply posts = 5;
 }
 
 message GetCommentRequest {
