@@ -28,6 +28,7 @@ message GetPostReply {
   string state = 6;
   google.protobuf.Timestamp createDate = 7;
   google.protobuf.Timestamp lastUpdateDate = 8;
+  repeated string tags = 9;
 }
 
 message GetPostsRequest {

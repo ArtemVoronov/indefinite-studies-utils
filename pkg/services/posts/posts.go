@@ -21,6 +21,7 @@ type GetPostResult struct {
 	State          string
 	CreateDate     time.Time
 	LastUpdateDate time.Time
+	Tags           []string
 }
 
 type GetCommentResult struct {
@@ -263,6 +264,7 @@ func ToGetPostsResult(post *GetPostReply) GetPostResult {
 		State:          post.GetState(),
 		CreateDate:     post.GetCreateDate().AsTime(),
 		LastUpdateDate: post.GetLastUpdateDate().AsTime(),
+		Tags:           post.Tags,
 	}
 }
 
