@@ -20,6 +20,7 @@ type FeedPostDTO struct {
 	State          string
 	CreateDate     time.Time
 	LastUpdateDate time.Time
+	Tags           []string
 }
 
 type FeedCommentDTO struct {
@@ -198,6 +199,7 @@ func toCreatePostRequest(post *FeedPostDTO) *CreatePostRequest {
 		State:          post.State,
 		CreateDate:     timestamppb.New(post.CreateDate),
 		LastUpdateDate: timestamppb.New(post.LastUpdateDate),
+		Tags:           post.Tags,
 	}
 }
 
@@ -211,6 +213,7 @@ func toUpdatePostRequest(post *FeedPostDTO) *UpdatePostRequest {
 		State:          post.State,
 		CreateDate:     timestamppb.New(post.CreateDate),
 		LastUpdateDate: timestamppb.New(post.LastUpdateDate),
+		Tags:           post.Tags,
 	}
 }
 
