@@ -36,7 +36,7 @@ func (s *ShardService) GetBucketIndex(key string) uint64 {
 	return bucketIndex
 }
 
-func (s *ShardService) GetBucket(bucketIndex uint64) int {
+func (s *ShardService) GetBucketByIndex(bucketIndex uint64) int {
 	for i := 0; i < s.bucketsNum; i++ {
 		interval := s.buckets[i]
 		if interval.From <= bucketIndex && bucketIndex < interval.To {
@@ -44,6 +44,11 @@ func (s *ShardService) GetBucket(bucketIndex uint64) int {
 		}
 	}
 	return 0
+}
+
+func (s *ShardService) GetBucketByKey(key string) int {
+	bucketIndex := s.GetBucketIndex(key)
+	return s.GetBucketByIndex(bucketIndex)
 }
 
 func CreateIntervals(bucketFactor int) []Interval {
