@@ -13,13 +13,13 @@ import (
 type VerificationResult struct {
 	IsValid   bool
 	IsExpired bool
-	Id        int
+	Uuid      string
 	Type      string
 	Role      string
 }
 
 type TokenClaimsResult struct {
-	Id   int
+	Uuid string
 	Type string
 	Role string
 }
@@ -65,11 +65,10 @@ func (s *AuthGRPCService) Shutdown() error {
 }
 
 func (s *AuthGRPCService) VerifyToken(token string) (*VerificationResult, error) {
-	var result *VerificationResult
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return result, fmt.Errorf("could not verify token, error during connection: %v", err)
+			return nil, fmt.Errorf("could not verify token, error during connection: %v", err)
 		}
 	}
 
@@ -78,26 +77,19 @@ func (s *AuthGRPCService) VerifyToken(token string) (*VerificationResult, error)
 
 	reply, err := s.client.VerifyToken(ctx, &VerifyTokenRequest{Token: token})
 	if err != nil {
-		return result, fmt.Errorf("could not get verify token; token: '%v'; error: %v", err, token)
+		return nil, fmt.Errorf("could not get verify token; token: '%v'; error: %v", err, token)
 	}
 
-	result = &VerificationResult{
-		IsValid:   reply.GetIsValid(),
-		IsExpired: reply.GetIsExpired(),
-		Id:        int(reply.GetId()),
-		Type:      reply.GetType(),
-		Role:      reply.GetRole(),
-	}
+	result := ToVerificationResult(reply)
 
-	return result, nil
+	return &result, nil
 }
 
 func (s *AuthGRPCService) GetTokenClaims(token string) (*TokenClaimsResult, error) {
-	var result *TokenClaimsResult
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return result, fmt.Errorf("could not get token claims; error during connection: %v", err)
+			return nil, fmt.Errorf("could not get token claims; error during connection: %v", err)
 		}
 	}
 
@@ -106,14 +98,28 @@ func (s *AuthGRPCService) GetTokenClaims(token string) (*TokenClaimsResult, erro
 
 	reply, err := s.client.GetTokenClaims(ctx, &GetTokenClaimsRequest{Token: token})
 	if err != nil {
-		return result, fmt.Errorf("could not get token claims; token: '%v'; error: %v. ", err, token)
+		return nil, fmt.Errorf("could not get token claims; token: '%v'; error: %v. ", err, token)
 	}
 
-	result = &TokenClaimsResult{
-		Id:   int(reply.GetId()),
+	result := ToTokenClaimsResult(reply)
+
+	return &result, nil
+}
+
+func ToVerificationResult(reply *VerifyTokenReply) VerificationResult {
+	return VerificationResult{
+		IsValid:   reply.GetIsValid(),
+		IsExpired: reply.GetIsExpired(),
+		Uuid:      reply.GetUuid(),
+		Type:      reply.GetType(),
+		Role:      reply.GetRole(),
+	}
+}
+
+func ToTokenClaimsResult(reply *GetTokenClaimsReply) TokenClaimsResult {
+	return TokenClaimsResult{
+		Uuid: reply.GetUuid(),
 		Type: reply.GetType(),
 		Role: reply.GetRole(),
 	}
-
-	return result, nil
 }

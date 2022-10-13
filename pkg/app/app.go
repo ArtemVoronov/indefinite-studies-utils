@@ -232,7 +232,7 @@ func AuthReqired(f FuncVerifyToken) gin.HandlerFunc {
 			return
 		}
 
-		c.Set(CTX_TOKEN_ID_KEY, verificationResult.Id)
+		c.Set(CTX_TOKEN_ID_KEY, verificationResult.Uuid)
 		c.Set(CTX_TOKEN_TYPE_KEY, verificationResult.Type)
 		c.Set(CTX_TOKEN_ROLE_KEY, verificationResult.Role)
 
