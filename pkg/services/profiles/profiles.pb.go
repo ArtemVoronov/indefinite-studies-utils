@@ -352,53 +352,6 @@ func (x *GetUsersRequest) GetShard() int32 {
 	return 0
 }
 
-type GetUsersByUuidsRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Uuids []string `protobuf:"bytes,1,rep,name=uuids,proto3" json:"uuids,omitempty"`
-}
-
-func (x *GetUsersByUuidsRequest) Reset() {
-	*x = GetUsersByUuidsRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_services_profiles_profiles_proto_msgTypes[5]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *GetUsersByUuidsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetUsersByUuidsRequest) ProtoMessage() {}
-
-func (x *GetUsersByUuidsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_services_profiles_profiles_proto_msgTypes[5]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetUsersByUuidsRequest.ProtoReflect.Descriptor instead.
-func (*GetUsersByUuidsRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_services_profiles_profiles_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *GetUsersByUuidsRequest) GetUuids() []string {
-	if x != nil {
-		return x.Uuids
-	}
-	return nil
-}
-
 type GetUsersReply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -414,7 +367,7 @@ type GetUsersReply struct {
 func (x *GetUsersReply) Reset() {
 	*x = GetUsersReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_services_profiles_profiles_proto_msgTypes[6]
+		mi := &file_pkg_services_profiles_profiles_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -427,7 +380,7 @@ func (x *GetUsersReply) String() string {
 func (*GetUsersReply) ProtoMessage() {}
 
 func (x *GetUsersReply) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_services_profiles_profiles_proto_msgTypes[6]
+	mi := &file_pkg_services_profiles_profiles_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -440,7 +393,7 @@ func (x *GetUsersReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUsersReply.ProtoReflect.Descriptor instead.
 func (*GetUsersReply) Descriptor() ([]byte, []int) {
-	return file_pkg_services_profiles_profiles_proto_rawDescGZIP(), []int{6}
+	return file_pkg_services_profiles_profiles_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *GetUsersReply) GetCount() int32 {
@@ -522,9 +475,6 @@ var file_pkg_services_profiles_profiles_proto_rawDesc = []byte{
 	0x73, 0x65, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x18, 0x02, 0x20, 0x01,
 	0x28, 0x05, 0x52, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x73, 0x68, 0x61,
 	0x72, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x73, 0x68, 0x61, 0x72, 0x64, 0x22,
-	0x2e, 0x0a, 0x16, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x73, 0x42, 0x79, 0x55, 0x75, 0x69,
-	0x64, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x75, 0x75, 0x69,
-	0x64, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x05, 0x75, 0x75, 0x69, 0x64, 0x73, 0x22,
 	0xa3, 0x01, 0x0a, 0x0d, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x73, 0x52, 0x65, 0x70, 0x6c,
 	0x79, 0x12, 0x14, 0x0a, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05,
 	0x52, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65,
@@ -535,7 +485,7 @@ var file_pkg_services_profiles_profiles_proto_rawDesc = []byte{
 	0x64, 0x73, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x2c, 0x0a, 0x05, 0x75, 0x73, 0x65, 0x72, 0x73,
 	0x18, 0x05, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x16, 0x2e, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65,
 	0x73, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x52, 0x05,
-	0x75, 0x73, 0x65, 0x72, 0x73, 0x32, 0x8f, 0x03, 0x0a, 0x0f, 0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c,
+	0x75, 0x73, 0x65, 0x72, 0x73, 0x32, 0xbf, 0x02, 0x0a, 0x0f, 0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c,
 	0x65, 0x73, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x61, 0x0a, 0x13, 0x56, 0x61, 0x6c,
 	0x69, 0x64, 0x61, 0x74, 0x65, 0x43, 0x72, 0x65, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x61, 0x6c, 0x73,
 	0x12, 0x24, 0x2e, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x2e, 0x56, 0x61, 0x6c, 0x69,
@@ -555,12 +505,7 @@ var file_pkg_services_profiles_profiles_proto_rawDesc = []byte{
 	0x18, 0x2e, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73,
 	0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x70, 0x72, 0x6f, 0x66,
 	0x69, 0x6c, 0x65, 0x73, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x70, 0x6c,
-	0x79, 0x22, 0x00, 0x28, 0x01, 0x30, 0x01, 0x12, 0x4e, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x55, 0x73,
-	0x65, 0x72, 0x73, 0x42, 0x79, 0x55, 0x75, 0x69, 0x64, 0x73, 0x12, 0x20, 0x2e, 0x70, 0x72, 0x6f,
-	0x66, 0x69, 0x6c, 0x65, 0x73, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x73, 0x42, 0x79,
-	0x55, 0x75, 0x69, 0x64, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x70,
-	0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x73,
-	0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x42, 0x51, 0x5a, 0x4f, 0x67, 0x69, 0x74, 0x68, 0x75,
+	0x79, 0x22, 0x00, 0x28, 0x01, 0x30, 0x01, 0x42, 0x51, 0x5a, 0x4f, 0x67, 0x69, 0x74, 0x68, 0x75,
 	0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x41, 0x72, 0x74, 0x65, 0x6d, 0x56, 0x6f, 0x72, 0x6f, 0x6e,
 	0x6f, 0x76, 0x2f, 0x69, 0x6e, 0x64, 0x65, 0x66, 0x69, 0x6e, 0x69, 0x74, 0x65, 0x2d, 0x73, 0x74,
 	0x75, 0x64, 0x69, 0x65, 0x73, 0x2d, 0x75, 0x74, 0x69, 0x6c, 0x73, 0x2f, 0x70, 0x6b, 0x67, 0x2f,
@@ -581,33 +526,30 @@ func file_pkg_services_profiles_profiles_proto_rawDescGZIP() []byte {
 	return file_pkg_services_profiles_profiles_proto_rawDescData
 }
 
-var file_pkg_services_profiles_profiles_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_pkg_services_profiles_profiles_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_pkg_services_profiles_profiles_proto_goTypes = []interface{}{
 	(*ValidateCredentialsRequest)(nil), // 0: profiles.ValidateCredentialsRequest
 	(*ValidateCredentialsReply)(nil),   // 1: profiles.ValidateCredentialsReply
 	(*GetUserRequest)(nil),             // 2: profiles.GetUserRequest
 	(*GetUserReply)(nil),               // 3: profiles.GetUserReply
 	(*GetUsersRequest)(nil),            // 4: profiles.GetUsersRequest
-	(*GetUsersByUuidsRequest)(nil),     // 5: profiles.GetUsersByUuidsRequest
-	(*GetUsersReply)(nil),              // 6: profiles.GetUsersReply
-	(*timestamp.Timestamp)(nil),        // 7: google.protobuf.Timestamp
+	(*GetUsersReply)(nil),              // 5: profiles.GetUsersReply
+	(*timestamp.Timestamp)(nil),        // 6: google.protobuf.Timestamp
 }
 var file_pkg_services_profiles_profiles_proto_depIdxs = []int32{
-	7, // 0: profiles.GetUserReply.createDate:type_name -> google.protobuf.Timestamp
-	7, // 1: profiles.GetUserReply.lastUpdateDate:type_name -> google.protobuf.Timestamp
+	6, // 0: profiles.GetUserReply.createDate:type_name -> google.protobuf.Timestamp
+	6, // 1: profiles.GetUserReply.lastUpdateDate:type_name -> google.protobuf.Timestamp
 	3, // 2: profiles.GetUsersReply.users:type_name -> profiles.GetUserReply
 	0, // 3: profiles.ProfilesService.ValidateCredentials:input_type -> profiles.ValidateCredentialsRequest
 	2, // 4: profiles.ProfilesService.GetUser:input_type -> profiles.GetUserRequest
 	4, // 5: profiles.ProfilesService.GetUsers:input_type -> profiles.GetUsersRequest
 	2, // 6: profiles.ProfilesService.GetUsersStream:input_type -> profiles.GetUserRequest
-	5, // 7: profiles.ProfilesService.GetUsersByUuids:input_type -> profiles.GetUsersByUuidsRequest
-	1, // 8: profiles.ProfilesService.ValidateCredentials:output_type -> profiles.ValidateCredentialsReply
-	3, // 9: profiles.ProfilesService.GetUser:output_type -> profiles.GetUserReply
-	6, // 10: profiles.ProfilesService.GetUsers:output_type -> profiles.GetUsersReply
-	3, // 11: profiles.ProfilesService.GetUsersStream:output_type -> profiles.GetUserReply
-	6, // 12: profiles.ProfilesService.GetUsersByUuids:output_type -> profiles.GetUsersReply
-	8, // [8:13] is the sub-list for method output_type
-	3, // [3:8] is the sub-list for method input_type
+	1, // 7: profiles.ProfilesService.ValidateCredentials:output_type -> profiles.ValidateCredentialsReply
+	3, // 8: profiles.ProfilesService.GetUser:output_type -> profiles.GetUserReply
+	5, // 9: profiles.ProfilesService.GetUsers:output_type -> profiles.GetUsersReply
+	3, // 10: profiles.ProfilesService.GetUsersStream:output_type -> profiles.GetUserReply
+	7, // [7:11] is the sub-list for method output_type
+	3, // [3:7] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name
 	3, // [3:3] is the sub-list for extension extendee
 	0, // [0:3] is the sub-list for field type_name
@@ -680,18 +622,6 @@ func file_pkg_services_profiles_profiles_proto_init() {
 			}
 		}
 		file_pkg_services_profiles_profiles_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetUsersByUuidsRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_pkg_services_profiles_profiles_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetUsersReply); i {
 			case 0:
 				return &v.state
@@ -710,7 +640,7 @@ func file_pkg_services_profiles_profiles_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_pkg_services_profiles_profiles_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

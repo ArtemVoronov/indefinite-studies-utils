@@ -11,7 +11,6 @@ service ProfilesService {
   rpc GetUser (GetUserRequest) returns (GetUserReply) {}
   rpc GetUsers(GetUsersRequest) returns (GetUsersReply) {}
   rpc GetUsersStream(stream GetUserRequest) returns (stream GetUserReply) {}
-  rpc GetUsersByUuids(GetUsersByUuidsRequest) returns (GetUsersReply) {}
 }
 
 message ValidateCredentialsRequest {
@@ -44,10 +43,6 @@ message GetUsersRequest {
   int32 offset = 1;
   int32 limit = 2;
   int32 shard = 3;
-}
-
-message GetUsersByUuidsRequest {
-  repeated string uuids = 1;
 }
 
 message GetUsersReply {

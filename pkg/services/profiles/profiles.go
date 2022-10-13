@@ -128,24 +128,6 @@ func (s *ProfilesGRPCService) GetUsers(offset int32, limit int32, shard int32) (
 	return reply, nil
 }
 
-func (s *ProfilesGRPCService) GetUsersByUuids(userUuids []string) (*GetUsersReply, error) {
-	if s.connection == nil {
-		err := s.connect()
-		if err != nil {
-			return nil, fmt.Errorf("could not GetUsers: %v", err)
-		}
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
-	defer cancel()
-
-	reply, err := s.client.GetUsersByUuids(ctx, &GetUsersByUuidsRequest{Uuids: userUuids})
-	if err != nil {
-		return nil, fmt.Errorf("could not GetUsers: %v", err)
-	}
-	return reply, nil
-}
-
 func (s *ProfilesGRPCService) GetUsersStream(userUuids []string) (<-chan (GetUserResult), error) {
 	var result chan (GetUserResult) = make(chan GetUserResult)
 	var resultErr error
