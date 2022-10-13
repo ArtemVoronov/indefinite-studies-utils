@@ -330,13 +330,13 @@ func IsTokenOfUserType(c *gin.Context) bool {
 	return tokenType == entities.TOKEN_TYPE_USER
 }
 
-func IsSameUser(c *gin.Context, userId int) bool {
-	userIdFromCtx, ok := c.Get(CTX_TOKEN_ID_KEY)
+func IsSameUser(c *gin.Context, userUuid string) bool {
+	userUuidFromCtx, ok := c.Get(CTX_TOKEN_ID_KEY)
 	if !ok {
 		return false
 	}
 
-	return userIdFromCtx.(int) == userId
+	return userUuidFromCtx == userUuid
 }
 
 func HasOwnerRole(c *gin.Context) bool {
