@@ -21,7 +21,7 @@ message GetPostRequest {
 
 message GetPostReply {
   string uuid = 1;
-  int32 authorId = 2;
+  string authorUuid = 2;
   string text = 3;
   string previewText = 4;
   string topic = 5;
@@ -53,7 +53,7 @@ message GetCommentRequest {
 message GetCommentReply {
   int32 id = 1;
   string uuid = 2;
-  int32 authorId = 3;
+  string authorUuid = 3;
   string postUuid = 4;
   int32 linkedCommentId = 5;
   string text = 6;

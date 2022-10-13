@@ -18,7 +18,7 @@ service FeedBuilderService {
 
 message CreatePostRequest {
   string uuid = 1;
-  int32 authorId = 2;
+  string authorUuid = 2;
   string text = 3;
   string previewText = 4;
   string topic = 5;
@@ -33,7 +33,7 @@ message CreatePostReply {
 
 message UpdatePostRequest {
   string uuid = 1;
-  int32 authorId = 2;
+  string authorUuid = 2;
   string text = 3;
   string previewText = 4;
   string topic = 5;
@@ -56,7 +56,7 @@ message DeletePostReply {
 message CreateCommentRequest {
   int32 id = 1;
   string uuid = 2;
-  int32 authorId = 3;
+  string authorUuid = 3;
   string postUuid = 4;
   int32 linkedCommentId = 5;
   string text = 6;
@@ -71,7 +71,7 @@ message CreateCommentReply {
 message UpdateCommentRequest {
   int32 id = 1;
   string uuid = 2;
-  int32 authorId = 3;
+  string authorUuid = 3;
   string postUuid = 4;
   int32 linkedCommentId = 5;
   string text = 6;

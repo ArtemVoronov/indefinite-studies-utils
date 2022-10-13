@@ -14,7 +14,7 @@ import (
 
 type GetPostResult struct {
 	Uuid           string
-	AuthorId       int
+	AuthorUuid     string
 	Text           string
 	PreviewText    string
 	Topic          string
@@ -27,7 +27,7 @@ type GetPostResult struct {
 type GetCommentResult struct {
 	Id              int
 	Uuid            string
-	AuthorId        int
+	AuthorUuid      string
 	PostUuid        string
 	LinkedCommentId *int
 	Text            string
@@ -257,7 +257,7 @@ func (s *PostsGRPCService) GetCommentsStream(postUuid string, commentIds []int32
 func ToGetPostsResult(post *GetPostReply) GetPostResult {
 	return GetPostResult{
 		Uuid:           post.GetUuid(),
-		AuthorId:       int(post.GetAuthorId()),
+		AuthorUuid:     post.GetAuthorUuid(),
 		Text:           post.GetText(),
 		PreviewText:    post.GetPreviewText(),
 		Topic:          post.GetTopic(),
@@ -272,7 +272,7 @@ func ToGetCommentResult(comment *GetCommentReply) GetCommentResult {
 	return GetCommentResult{
 		Id:              int(comment.GetId()),
 		Uuid:            comment.GetUuid(),
-		AuthorId:        int(comment.GetAuthorId()),
+		AuthorUuid:      comment.GetAuthorUuid(),
 		PostUuid:        comment.GetPostUuid(),
 		LinkedCommentId: utils.Int32ToIntPtr(comment.GetLinkedCommentId()),
 		Text:            comment.GetText(),

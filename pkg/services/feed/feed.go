@@ -13,7 +13,7 @@ import (
 
 type FeedPostDTO struct {
 	Uuid           string
-	AuthorId       int32
+	AuthorUuid     string
 	Text           string
 	PreviewText    string
 	Topic          string
@@ -26,7 +26,7 @@ type FeedPostDTO struct {
 type FeedCommentDTO struct {
 	Id              int32
 	Uuid            string
-	AuthorId        int32
+	AuthorUuid      string
 	PostUuid        string
 	LinkedCommentId int32
 	Text            string
@@ -192,7 +192,7 @@ func (s *FeedBuilderGRPCService) UpdateUser(user *FeedUserDTO) error {
 func toCreatePostRequest(post *FeedPostDTO) *CreatePostRequest {
 	return &CreatePostRequest{
 		Uuid:           post.Uuid,
-		AuthorId:       post.AuthorId,
+		AuthorUuid:     post.AuthorUuid,
 		Text:           post.Text,
 		PreviewText:    post.PreviewText,
 		Topic:          post.Topic,
@@ -206,7 +206,7 @@ func toCreatePostRequest(post *FeedPostDTO) *CreatePostRequest {
 func toUpdatePostRequest(post *FeedPostDTO) *UpdatePostRequest {
 	return &UpdatePostRequest{
 		Uuid:           post.Uuid,
-		AuthorId:       post.AuthorId,
+		AuthorUuid:     post.AuthorUuid,
 		Text:           post.Text,
 		PreviewText:    post.PreviewText,
 		Topic:          post.Topic,
@@ -221,7 +221,7 @@ func toCreateCommentRequest(comment *FeedCommentDTO) *CreateCommentRequest {
 	return &CreateCommentRequest{
 		Id:              int32(comment.Id),
 		Uuid:            comment.Uuid,
-		AuthorId:        comment.AuthorId,
+		AuthorUuid:      comment.AuthorUuid,
 		PostUuid:        comment.PostUuid,
 		LinkedCommentId: comment.LinkedCommentId,
 		Text:            comment.Text,
@@ -235,7 +235,7 @@ func toUpdateCommentRequest(comment *FeedCommentDTO) *UpdateCommentRequest {
 	return &UpdateCommentRequest{
 		Id:              int32(comment.Id),
 		Uuid:            comment.Uuid,
-		AuthorId:        comment.AuthorId,
+		AuthorUuid:      comment.AuthorUuid,
 		PostUuid:        comment.PostUuid,
 		LinkedCommentId: comment.LinkedCommentId,
 		Text:            comment.Text,
