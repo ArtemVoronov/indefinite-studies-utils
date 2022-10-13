@@ -93,7 +93,7 @@ message DeleteCommentReply {
 }
 
 message UpdateUserRequest {
-  int32 id = 1;
+  string uuid = 1;
   string login = 2;
   string email = 3;
   string role = 4;

@@ -11,6 +11,7 @@ service ProfilesService {
   rpc GetUser (GetUserRequest) returns (GetUserReply) {}
   rpc GetUsers(GetUsersRequest) returns (GetUsersReply) {}
   rpc GetUsersStream(stream GetUserRequest) returns (stream GetUserReply) {}
+  rpc GetUsersByUuids(GetUsersByUuidsRequest) returns (GetUsersReply) {}
 }
 
 message ValidateCredentialsRequest {
@@ -19,34 +20,40 @@ message ValidateCredentialsRequest {
 }
 
 message ValidateCredentialsReply {
-  int32 userId = 1;
+  string userUuid = 1;
   bool isValid = 2;
   string role = 3;
 }
 
 message GetUserRequest {
-  int32 id = 1;
+  string uuid = 1;
 }
 
 message GetUserReply {
   int32 id = 1;
-  string login = 2;
-  string email = 3;
-  string role = 4;
-  string state = 5;
-  google.protobuf.Timestamp createDate = 6;
-  google.protobuf.Timestamp lastUpdateDate = 7;
+  string uuid = 2;
+  string login = 3;
+  string email = 4;
+  string role = 5;
+  string state = 6;
+  google.protobuf.Timestamp createDate = 7;
+  google.protobuf.Timestamp lastUpdateDate = 8;
 }
 
 message GetUsersRequest {
   int32 offset = 1;
   int32 limit = 2;
-  repeated int32 ids = 3 [packed=true];
+  int32 shard = 3;
+}
+
+message GetUsersByUuidsRequest {
+  repeated string uuids = 1;
 }
 
 message GetUsersReply {
   int32 count = 1;
   int32 offset = 2;
   int32 limit = 3;
-  repeated GetUserReply users = 4;
+  int32 shardsCount = 4;
+  repeated GetUserReply users = 5;
 }

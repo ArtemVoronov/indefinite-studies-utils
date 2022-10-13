@@ -36,7 +36,7 @@ type FeedCommentDTO struct {
 }
 
 type FeedUserDTO struct {
-	Id             int32
+	Uuid           string
 	Login          string
 	Email          string
 	Role           string
@@ -247,7 +247,7 @@ func toUpdateCommentRequest(comment *FeedCommentDTO) *UpdateCommentRequest {
 
 func toUpdateUserRequest(user *FeedUserDTO) *UpdateUserRequest {
 	return &UpdateUserRequest{
-		Id:    user.Id,
+		Uuid:  user.Uuid,
 		Login: user.Login,
 		Email: user.Email,
 		Role:  user.Role,

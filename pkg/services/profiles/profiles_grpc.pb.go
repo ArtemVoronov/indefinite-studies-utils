@@ -26,6 +26,7 @@ type ProfilesServiceClient interface {
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserReply, error)
 	GetUsers(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*GetUsersReply, error)
 	GetUsersStream(ctx context.Context, opts ...grpc.CallOption) (ProfilesService_GetUsersStreamClient, error)
+	GetUsersByUuids(ctx context.Context, in *GetUsersByUuidsRequest, opts ...grpc.CallOption) (*GetUsersReply, error)
 }
 
 type profilesServiceClient struct {
@@ -94,6 +95,15 @@ func (x *profilesServiceGetUsersStreamClient) Recv() (*GetUserReply, error) {
 	return m, nil
 }
 
+func (c *profilesServiceClient) GetUsersByUuids(ctx context.Context, in *GetUsersByUuidsRequest, opts ...grpc.CallOption) (*GetUsersReply, error) {
+	out := new(GetUsersReply)
+	err := c.cc.Invoke(ctx, "/profiles.ProfilesService/GetUsersByUuids", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProfilesServiceServer is the server API for ProfilesService service.
 // All implementations must embed UnimplementedProfilesServiceServer
 // for forward compatibility
@@ -102,6 +112,7 @@ type ProfilesServiceServer interface {
 	GetUser(context.Context, *GetUserRequest) (*GetUserReply, error)
 	GetUsers(context.Context, *GetUsersRequest) (*GetUsersReply, error)
 	GetUsersStream(ProfilesService_GetUsersStreamServer) error
+	GetUsersByUuids(context.Context, *GetUsersByUuidsRequest) (*GetUsersReply, error)
 	mustEmbedUnimplementedProfilesServiceServer()
 }
 
@@ -120,6 +131,9 @@ func (UnimplementedProfilesServiceServer) GetUsers(context.Context, *GetUsersReq
 }
 func (UnimplementedProfilesServiceServer) GetUsersStream(ProfilesService_GetUsersStreamServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetUsersStream not implemented")
+}
+func (UnimplementedProfilesServiceServer) GetUsersByUuids(context.Context, *GetUsersByUuidsRequest) (*GetUsersReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUsersByUuids not implemented")
 }
 func (UnimplementedProfilesServiceServer) mustEmbedUnimplementedProfilesServiceServer() {}
 
@@ -214,6 +228,24 @@ func (x *profilesServiceGetUsersStreamServer) Recv() (*GetUserRequest, error) {
 	return m, nil
 }
 
+func _ProfilesService_GetUsersByUuids_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUsersByUuidsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProfilesServiceServer).GetUsersByUuids(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/profiles.ProfilesService/GetUsersByUuids",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProfilesServiceServer).GetUsersByUuids(ctx, req.(*GetUsersByUuidsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProfilesService_ServiceDesc is the grpc.ServiceDesc for ProfilesService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -232,6 +264,10 @@ var ProfilesService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUsers",
 			Handler:    _ProfilesService_GetUsers_Handler,
+		},
+		{
+			MethodName: "GetUsersByUuids",
+			Handler:    _ProfilesService_GetUsersByUuids_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

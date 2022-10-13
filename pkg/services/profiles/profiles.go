@@ -12,13 +12,14 @@ import (
 )
 
 type CredentialsValidationResult struct {
-	UserId  int    `json:"userId" binding:"required"`
-	IsValid bool   `json:"isValid" binding:"required"`
-	Role    string `json:"role" binding:"required"`
+	UserUuid string `json:"userUuid" binding:"required"`
+	IsValid  bool   `json:"isValid" binding:"required"`
+	Role     string `json:"role" binding:"required"`
 }
 
 type GetUserResult struct {
 	Id             int
+	Uuid           string
 	Login          string
 	Email          string
 	Role           string
@@ -68,11 +69,10 @@ func (s *ProfilesGRPCService) Shutdown() error {
 }
 
 func (s *ProfilesGRPCService) ValidateCredentials(login string, password string) (*CredentialsValidationResult, error) {
-	var result *CredentialsValidationResult
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return result, fmt.Errorf("could not ValidateCredentials: %v", err)
+			return nil, fmt.Errorf("could not ValidateCredentials: %v", err)
 		}
 	}
 
@@ -81,83 +81,72 @@ func (s *ProfilesGRPCService) ValidateCredentials(login string, password string)
 
 	reply, err := s.client.ValidateCredentials(ctx, &ValidateCredentialsRequest{Login: login, Password: password})
 	if err != nil {
-		return result, fmt.Errorf("could not ValidateCredentials: %v", err)
+		return nil, fmt.Errorf("could not ValidateCredentials: %v", err)
 	}
 
-	result = &CredentialsValidationResult{
-		IsValid: reply.GetIsValid(),
-		UserId:  int(reply.GetUserId()),
-		Role:    reply.GetRole(),
-	}
+	result := ToCredentialsValidationResult(reply)
 
-	return result, nil
+	return &result, nil
 }
 
-func (s *ProfilesGRPCService) GetUser(userId int32) (*GetUserResult, error) {
-	var result *GetUserResult
+func (s *ProfilesGRPCService) GetUser(userUuid string) (*GetUserResult, error) {
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return result, fmt.Errorf("could not GetUser: %v", err)
+			return nil, fmt.Errorf("could not GetUser: %v", err)
 		}
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
-	reply, err := s.client.GetUser(ctx, &GetUserRequest{Id: userId})
+	reply, err := s.client.GetUser(ctx, &GetUserRequest{Uuid: userUuid})
 	if err != nil {
-		return result, fmt.Errorf("could not GetUser: %v", err)
+		return nil, fmt.Errorf("could not GetUser: %v", err)
 	}
 
-	result = &GetUserResult{
-		Id:             int(reply.GetId()),
-		Login:          reply.GetLogin(),
-		Email:          reply.GetEmail(),
-		Role:           reply.GetRole(),
-		State:          reply.GetState(),
-		CreateDate:     reply.GetCreateDate().AsTime(),
-		LastUpdateDate: reply.GetLastUpdateDate().AsTime(),
-	}
+	result := ToGetUserResult(reply)
 
-	return result, nil
+	return &result, nil
 }
 
-func (s *ProfilesGRPCService) GetUsers(offset int32, limit int32, userIds []int32) ([]GetUserResult, error) {
-	var result []GetUserResult
+func (s *ProfilesGRPCService) GetUsers(offset int32, limit int32, shard int32) (*GetUsersReply, error) {
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return result, fmt.Errorf("could not GetUsers: %v", err)
+			return nil, fmt.Errorf("could not GetUsers: %v", err)
 		}
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
-	reply, err := s.client.GetUsers(ctx, &GetUsersRequest{Offset: offset, Limit: limit, Ids: userIds})
+	reply, err := s.client.GetUsers(ctx, &GetUsersRequest{Offset: offset, Limit: limit, Shard: shard})
 	if err != nil {
-		return result, fmt.Errorf("could not GetUsers: %v", err)
+		return nil, fmt.Errorf("could not GetUsers: %v", err)
 	}
-
-	users := reply.GetUsers()
-
-	for _, userPtr := range users {
-		result = append(result, GetUserResult{
-			Id:             int(userPtr.GetId()),
-			Login:          userPtr.GetLogin(),
-			Email:          userPtr.GetEmail(),
-			Role:           userPtr.GetRole(),
-			State:          userPtr.GetState(),
-			CreateDate:     userPtr.GetCreateDate().AsTime(),
-			LastUpdateDate: userPtr.GetLastUpdateDate().AsTime(),
-		})
-	}
-
-	return result, nil
+	return reply, nil
 }
 
-func (s *ProfilesGRPCService) GetUsersStream(userIds []int32) (<-chan (GetUserResult), error) {
+func (s *ProfilesGRPCService) GetUsersByUuids(userUuids []string) (*GetUsersReply, error) {
+	if s.connection == nil {
+		err := s.connect()
+		if err != nil {
+			return nil, fmt.Errorf("could not GetUsers: %v", err)
+		}
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
+	defer cancel()
+
+	reply, err := s.client.GetUsersByUuids(ctx, &GetUsersByUuidsRequest{Uuids: userUuids})
+	if err != nil {
+		return nil, fmt.Errorf("could not GetUsers: %v", err)
+	}
+	return reply, nil
+}
+
+func (s *ProfilesGRPCService) GetUsersStream(userUuids []string) (<-chan (GetUserResult), error) {
 	var result chan (GetUserResult) = make(chan GetUserResult)
 	var resultErr error
 	if s.connection == nil {
@@ -190,23 +179,45 @@ func (s *ProfilesGRPCService) GetUsersStream(userIds []int32) (<-chan (GetUserRe
 				resultErr = fmt.Errorf("s.client.GetUsersStream: stream.Recv failed: %v", err)
 				return
 			}
-			result <- GetUserResult{
-				Id:             int(in.GetId()),
-				Login:          in.GetLogin(),
-				Email:          in.GetEmail(),
-				Role:           in.GetRole(),
-				State:          in.GetState(),
-				CreateDate:     in.GetCreateDate().AsTime(),
-				LastUpdateDate: in.GetLastUpdateDate().AsTime(),
-			}
+			result <- ToGetUserResult(in)
 		}
 	}()
-	for _, userId := range userIds {
-		err := stream.Send(&GetUserRequest{Id: userId})
+	for _, userUuid := range userUuids {
+		err := stream.Send(&GetUserRequest{Uuid: userUuid})
 		if err != nil {
-			resultErr = fmt.Errorf("s.client.GetUsersStream: stream.Send(%v) failed: %v", userId, err)
+			resultErr = fmt.Errorf("s.client.GetUsersStream: stream.Send(%v) failed: %v", userUuid, err)
 			return result, resultErr
 		}
 	}
 	return result, resultErr
+}
+
+func ToCredentialsValidationResult(reply *ValidateCredentialsReply) CredentialsValidationResult {
+	return CredentialsValidationResult{
+		IsValid:  reply.GetIsValid(),
+		UserUuid: reply.GetUserUuid(),
+		Role:     reply.GetRole(),
+	}
+}
+func ToGetUserResult(reply *GetUserReply) GetUserResult {
+	return GetUserResult{
+		Id:             int(reply.GetId()),
+		Uuid:           reply.GetUuid(),
+		Login:          reply.GetLogin(),
+		Email:          reply.GetEmail(),
+		Role:           reply.GetRole(),
+		State:          reply.GetState(),
+		CreateDate:     reply.GetCreateDate().AsTime(),
+		LastUpdateDate: reply.GetLastUpdateDate().AsTime(),
+	}
+}
+
+func ToGetGetUserResultSlice(replies []*GetUserReply) []GetUserResult {
+	result := []GetUserResult{}
+
+	for _, p := range replies {
+		result = append(result, ToGetUserResult(p))
+	}
+
+	return result
 }
