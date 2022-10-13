@@ -58,7 +58,7 @@ message CreateCommentRequest {
   string uuid = 2;
   string authorUuid = 3;
   string postUuid = 4;
-  int32 linkedCommentId = 5;
+  string linkedCommentUuid = 5;
   string text = 6;
   string state = 7;
   google.protobuf.Timestamp createDate = 8;
@@ -73,7 +73,7 @@ message UpdateCommentRequest {
   string uuid = 2;
   string authorUuid = 3;
   string postUuid = 4;
-  int32 linkedCommentId = 5;
+  string linkedCommentUuid = 5;
   string text = 6;
   string state = 7;
   google.protobuf.Timestamp createDate = 8;

@@ -24,15 +24,15 @@ type FeedPostDTO struct {
 }
 
 type FeedCommentDTO struct {
-	Id              int32
-	Uuid            string
-	AuthorUuid      string
-	PostUuid        string
-	LinkedCommentId int32
-	Text            string
-	State           string
-	CreateDate      time.Time
-	LastUpdateDate  time.Time
+	Id                int32
+	Uuid              string
+	AuthorUuid        string
+	PostUuid          string
+	LinkedCommentUuid string
+	Text              string
+	State             string
+	CreateDate        time.Time
+	LastUpdateDate    time.Time
 }
 
 type FeedUserDTO struct {
@@ -219,29 +219,29 @@ func toUpdatePostRequest(post *FeedPostDTO) *UpdatePostRequest {
 
 func toCreateCommentRequest(comment *FeedCommentDTO) *CreateCommentRequest {
 	return &CreateCommentRequest{
-		Id:              int32(comment.Id),
-		Uuid:            comment.Uuid,
-		AuthorUuid:      comment.AuthorUuid,
-		PostUuid:        comment.PostUuid,
-		LinkedCommentId: comment.LinkedCommentId,
-		Text:            comment.Text,
-		State:           comment.State,
-		CreateDate:      timestamppb.New(comment.CreateDate),
-		LastUpdateDate:  timestamppb.New(comment.LastUpdateDate),
+		Id:                int32(comment.Id),
+		Uuid:              comment.Uuid,
+		AuthorUuid:        comment.AuthorUuid,
+		PostUuid:          comment.PostUuid,
+		LinkedCommentUuid: comment.LinkedCommentUuid,
+		Text:              comment.Text,
+		State:             comment.State,
+		CreateDate:        timestamppb.New(comment.CreateDate),
+		LastUpdateDate:    timestamppb.New(comment.LastUpdateDate),
 	}
 }
 
 func toUpdateCommentRequest(comment *FeedCommentDTO) *UpdateCommentRequest {
 	return &UpdateCommentRequest{
-		Id:              int32(comment.Id),
-		Uuid:            comment.Uuid,
-		AuthorUuid:      comment.AuthorUuid,
-		PostUuid:        comment.PostUuid,
-		LinkedCommentId: comment.LinkedCommentId,
-		Text:            comment.Text,
-		State:           comment.State,
-		CreateDate:      timestamppb.New(comment.CreateDate),
-		LastUpdateDate:  timestamppb.New(comment.LastUpdateDate),
+		Id:                int32(comment.Id),
+		Uuid:              comment.Uuid,
+		AuthorUuid:        comment.AuthorUuid,
+		PostUuid:          comment.PostUuid,
+		LinkedCommentUuid: comment.LinkedCommentUuid,
+		Text:              comment.Text,
+		State:             comment.State,
+		CreateDate:        timestamppb.New(comment.CreateDate),
+		LastUpdateDate:    timestamppb.New(comment.LastUpdateDate),
 	}
 }
 

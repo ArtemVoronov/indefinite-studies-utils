@@ -6,7 +6,6 @@ import (
 	"io"
 	"time"
 
-	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/utils"
 	grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
@@ -25,15 +24,15 @@ type GetPostResult struct {
 }
 
 type GetCommentResult struct {
-	Id              int
-	Uuid            string
-	AuthorUuid      string
-	PostUuid        string
-	LinkedCommentId *int
-	Text            string
-	State           string
-	CreateDate      time.Time
-	LastUpdateDate  time.Time
+	Id                int
+	Uuid              string
+	AuthorUuid        string
+	PostUuid          string
+	LinkedCommentUuid string
+	Text              string
+	State             string
+	CreateDate        time.Time
+	LastUpdateDate    time.Time
 }
 
 type PostsGRPCService struct {
@@ -270,15 +269,15 @@ func ToGetPostsResult(post *GetPostReply) GetPostResult {
 
 func ToGetCommentResult(comment *GetCommentReply) GetCommentResult {
 	return GetCommentResult{
-		Id:              int(comment.GetId()),
-		Uuid:            comment.GetUuid(),
-		AuthorUuid:      comment.GetAuthorUuid(),
-		PostUuid:        comment.GetPostUuid(),
-		LinkedCommentId: utils.Int32ToIntPtr(comment.GetLinkedCommentId()),
-		Text:            comment.GetText(),
-		State:           comment.GetState(),
-		CreateDate:      comment.GetCreateDate().AsTime(),
-		LastUpdateDate:  comment.GetLastUpdateDate().AsTime(),
+		Id:                int(comment.GetId()),
+		Uuid:              comment.GetUuid(),
+		AuthorUuid:        comment.GetAuthorUuid(),
+		PostUuid:          comment.GetPostUuid(),
+		LinkedCommentUuid: comment.GetLinkedCommentUuid(),
+		Text:              comment.GetText(),
+		State:             comment.GetState(),
+		CreateDate:        comment.GetCreateDate().AsTime(),
+		LastUpdateDate:    comment.GetLastUpdateDate().AsTime(),
 	}
 }
 
