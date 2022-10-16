@@ -14,8 +14,11 @@ service FeedBuilderService {
   rpc UpdateComment (UpdateCommentRequest) returns (UpdateCommentReply) {}
   rpc DeleteComment (DeleteCommentRequest) returns (DeleteCommentReply) {}
   rpc UpdateUser (UpdateUserRequest) returns (UpdateUserReply) {}
+  rpc CreateTag (CreateTagRequest) returns (CreateTagReply) {}
+  rpc UpdateTag (UpdateTagRequest) returns (UpdateTagReply) {}
 }
 
+// TODO: refactor entites: create user, comment, post, tag and reuse it
 message CreatePostRequest {
   string uuid = 1;
   string authorUuid = 2;
@@ -25,7 +28,7 @@ message CreatePostRequest {
   string state = 6;
   google.protobuf.Timestamp createDate = 7;
   google.protobuf.Timestamp lastUpdateDate = 8;
-  repeated string tags = 9;
+  repeated int32 tagIds = 9;
 }
 
 message CreatePostReply {
@@ -40,7 +43,7 @@ message UpdatePostRequest {
   string state = 6;
   google.protobuf.Timestamp createDate = 7;
   google.protobuf.Timestamp lastUpdateDate = 8;
-  repeated string tags = 9;
+  repeated int32 tagIds = 9;
 }
 
 message UpdatePostReply {
@@ -101,4 +104,20 @@ message UpdateUserRequest {
 }
 
 message UpdateUserReply {
+}
+
+message CreateTagRequest {
+  int32 id = 1;
+  string name = 2;
+}
+
+message CreateTagReply {
+}
+
+message UpdateTagRequest {
+  int32 id = 1;
+  string name = 2;
+}
+
+message UpdateTagReply {
 }

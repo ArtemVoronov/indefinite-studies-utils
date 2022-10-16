@@ -20,7 +20,7 @@ type GetPostResult struct {
 	State          string
 	CreateDate     time.Time
 	LastUpdateDate time.Time
-	Tags           []string
+	TagIds         []int
 }
 
 type GetCommentResult struct {
@@ -33,6 +33,11 @@ type GetCommentResult struct {
 	State             string
 	CreateDate        time.Time
 	LastUpdateDate    time.Time
+}
+
+type GetTagResult struct {
+	Id   int
+	Name string
 }
 
 type PostsGRPCService struct {
@@ -253,6 +258,45 @@ func (s *PostsGRPCService) GetCommentsStream(postUuid string, commentIds []int32
 	return result, resultErr
 }
 
+func (s *PostsGRPCService) GetTag(id int32) (*GetTagResult, error) {
+	if s.connection == nil {
+		err := s.connect()
+		if err != nil {
+			return nil, fmt.Errorf("could not GetTag: %v", err)
+		}
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
+	defer cancel()
+
+	reply, err := s.client.GetTag(ctx, &GetTagRequest{Id: id})
+	if err != nil {
+		return nil, fmt.Errorf("could not GetTag: %v", err)
+	}
+
+	result := ToGetTagResult(reply)
+
+	return &result, nil
+}
+
+func (s *PostsGRPCService) GetTags(offset int32, limit int32) (*GetTagsReply, error) {
+	if s.connection == nil {
+		err := s.connect()
+		if err != nil {
+			return nil, fmt.Errorf("could not GetTags: %v", err)
+		}
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
+	defer cancel()
+
+	reply, err := s.client.GetTags(ctx, &GetTagsRequest{Offset: offset, Limit: limit})
+	if err != nil {
+		return nil, fmt.Errorf("could not GetTags: %v", err)
+	}
+	return reply, nil
+}
+
 func ToGetPostsResult(post *GetPostReply) GetPostResult {
 	return GetPostResult{
 		Uuid:           post.GetUuid(),
@@ -263,7 +307,7 @@ func ToGetPostsResult(post *GetPostReply) GetPostResult {
 		State:          post.GetState(),
 		CreateDate:     post.GetCreateDate().AsTime(),
 		LastUpdateDate: post.GetLastUpdateDate().AsTime(),
-		Tags:           post.Tags,
+		TagIds:         ToInt(post.TagIds),
 	}
 }
 
@@ -286,6 +330,43 @@ func ToGetPostsResultSlice(posts []*GetPostReply) []GetPostResult {
 
 	for _, p := range posts {
 		result = append(result, ToGetPostsResult(p))
+	}
+
+	return result
+}
+
+func ToGetTagResult(tag *GetTagReply) GetTagResult {
+	return GetTagResult{
+		Id:   int(tag.Id),
+		Name: tag.Name,
+	}
+}
+
+func ToGetTagResultSlice(tags []*GetTagReply) []GetTagResult {
+	result := []GetTagResult{}
+
+	for _, p := range tags {
+		result = append(result, ToGetTagResult(p))
+	}
+
+	return result
+}
+
+func ToInt32(in []int) []int32 {
+	result := make([]int32, 0, len(in))
+
+	for _, p := range in {
+		result = append(result, int32(p))
+	}
+
+	return result
+}
+
+func ToInt(in []int32) []int {
+	result := make([]int, 0, len(in))
+
+	for _, p := range in {
+		result = append(result, int(p))
 	}
 
 	return result

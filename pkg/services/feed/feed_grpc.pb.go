@@ -29,6 +29,8 @@ type FeedBuilderServiceClient interface {
 	UpdateComment(ctx context.Context, in *UpdateCommentRequest, opts ...grpc.CallOption) (*UpdateCommentReply, error)
 	DeleteComment(ctx context.Context, in *DeleteCommentRequest, opts ...grpc.CallOption) (*DeleteCommentReply, error)
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserReply, error)
+	CreateTag(ctx context.Context, in *CreateTagRequest, opts ...grpc.CallOption) (*CreateTagReply, error)
+	UpdateTag(ctx context.Context, in *UpdateTagRequest, opts ...grpc.CallOption) (*UpdateTagReply, error)
 }
 
 type feedBuilderServiceClient struct {
@@ -102,6 +104,24 @@ func (c *feedBuilderServiceClient) UpdateUser(ctx context.Context, in *UpdateUse
 	return out, nil
 }
 
+func (c *feedBuilderServiceClient) CreateTag(ctx context.Context, in *CreateTagRequest, opts ...grpc.CallOption) (*CreateTagReply, error) {
+	out := new(CreateTagReply)
+	err := c.cc.Invoke(ctx, "/posts.FeedBuilderService/CreateTag", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *feedBuilderServiceClient) UpdateTag(ctx context.Context, in *UpdateTagRequest, opts ...grpc.CallOption) (*UpdateTagReply, error) {
+	out := new(UpdateTagReply)
+	err := c.cc.Invoke(ctx, "/posts.FeedBuilderService/UpdateTag", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FeedBuilderServiceServer is the server API for FeedBuilderService service.
 // All implementations must embed UnimplementedFeedBuilderServiceServer
 // for forward compatibility
@@ -113,6 +133,8 @@ type FeedBuilderServiceServer interface {
 	UpdateComment(context.Context, *UpdateCommentRequest) (*UpdateCommentReply, error)
 	DeleteComment(context.Context, *DeleteCommentRequest) (*DeleteCommentReply, error)
 	UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserReply, error)
+	CreateTag(context.Context, *CreateTagRequest) (*CreateTagReply, error)
+	UpdateTag(context.Context, *UpdateTagRequest) (*UpdateTagReply, error)
 	mustEmbedUnimplementedFeedBuilderServiceServer()
 }
 
@@ -140,6 +162,12 @@ func (UnimplementedFeedBuilderServiceServer) DeleteComment(context.Context, *Del
 }
 func (UnimplementedFeedBuilderServiceServer) UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUser not implemented")
+}
+func (UnimplementedFeedBuilderServiceServer) CreateTag(context.Context, *CreateTagRequest) (*CreateTagReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateTag not implemented")
+}
+func (UnimplementedFeedBuilderServiceServer) UpdateTag(context.Context, *UpdateTagRequest) (*UpdateTagReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateTag not implemented")
 }
 func (UnimplementedFeedBuilderServiceServer) mustEmbedUnimplementedFeedBuilderServiceServer() {}
 
@@ -280,6 +308,42 @@ func _FeedBuilderService_UpdateUser_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FeedBuilderService_CreateTag_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateTagRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FeedBuilderServiceServer).CreateTag(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/posts.FeedBuilderService/CreateTag",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FeedBuilderServiceServer).CreateTag(ctx, req.(*CreateTagRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FeedBuilderService_UpdateTag_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateTagRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FeedBuilderServiceServer).UpdateTag(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/posts.FeedBuilderService/UpdateTag",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FeedBuilderServiceServer).UpdateTag(ctx, req.(*UpdateTagRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // FeedBuilderService_ServiceDesc is the grpc.ServiceDesc for FeedBuilderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -314,6 +378,14 @@ var FeedBuilderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateUser",
 			Handler:    _FeedBuilderService_UpdateUser_Handler,
+		},
+		{
+			MethodName: "CreateTag",
+			Handler:    _FeedBuilderService_CreateTag_Handler,
+		},
+		{
+			MethodName: "UpdateTag",
+			Handler:    _FeedBuilderService_UpdateTag_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -28,6 +28,8 @@ type PostsServiceClient interface {
 	GetComment(ctx context.Context, in *GetCommentRequest, opts ...grpc.CallOption) (*GetCommentReply, error)
 	GetComments(ctx context.Context, in *GetCommentsRequest, opts ...grpc.CallOption) (*GetCommentsReply, error)
 	GetCommentsStream(ctx context.Context, opts ...grpc.CallOption) (PostsService_GetCommentsStreamClient, error)
+	GetTag(ctx context.Context, in *GetTagRequest, opts ...grpc.CallOption) (*GetTagReply, error)
+	GetTags(ctx context.Context, in *GetTagsRequest, opts ...grpc.CallOption) (*GetTagsReply, error)
 }
 
 type postsServiceClient struct {
@@ -136,6 +138,24 @@ func (x *postsServiceGetCommentsStreamClient) Recv() (*GetCommentReply, error) {
 	return m, nil
 }
 
+func (c *postsServiceClient) GetTag(ctx context.Context, in *GetTagRequest, opts ...grpc.CallOption) (*GetTagReply, error) {
+	out := new(GetTagReply)
+	err := c.cc.Invoke(ctx, "/posts.PostsService/GetTag", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *postsServiceClient) GetTags(ctx context.Context, in *GetTagsRequest, opts ...grpc.CallOption) (*GetTagsReply, error) {
+	out := new(GetTagsReply)
+	err := c.cc.Invoke(ctx, "/posts.PostsService/GetTags", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PostsServiceServer is the server API for PostsService service.
 // All implementations must embed UnimplementedPostsServiceServer
 // for forward compatibility
@@ -146,6 +166,8 @@ type PostsServiceServer interface {
 	GetComment(context.Context, *GetCommentRequest) (*GetCommentReply, error)
 	GetComments(context.Context, *GetCommentsRequest) (*GetCommentsReply, error)
 	GetCommentsStream(PostsService_GetCommentsStreamServer) error
+	GetTag(context.Context, *GetTagRequest) (*GetTagReply, error)
+	GetTags(context.Context, *GetTagsRequest) (*GetTagsReply, error)
 	mustEmbedUnimplementedPostsServiceServer()
 }
 
@@ -170,6 +192,12 @@ func (UnimplementedPostsServiceServer) GetComments(context.Context, *GetComments
 }
 func (UnimplementedPostsServiceServer) GetCommentsStream(PostsService_GetCommentsStreamServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetCommentsStream not implemented")
+}
+func (UnimplementedPostsServiceServer) GetTag(context.Context, *GetTagRequest) (*GetTagReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTag not implemented")
+}
+func (UnimplementedPostsServiceServer) GetTags(context.Context, *GetTagsRequest) (*GetTagsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTags not implemented")
 }
 func (UnimplementedPostsServiceServer) mustEmbedUnimplementedPostsServiceServer() {}
 
@@ -308,6 +336,42 @@ func (x *postsServiceGetCommentsStreamServer) Recv() (*GetCommentRequest, error)
 	return m, nil
 }
 
+func _PostsService_GetTag_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTagRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostsServiceServer).GetTag(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/posts.PostsService/GetTag",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostsServiceServer).GetTag(ctx, req.(*GetTagRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PostsService_GetTags_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTagsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostsServiceServer).GetTags(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/posts.PostsService/GetTags",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostsServiceServer).GetTags(ctx, req.(*GetTagsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PostsService_ServiceDesc is the grpc.ServiceDesc for PostsService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -330,6 +394,14 @@ var PostsService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetComments",
 			Handler:    _PostsService_GetComments_Handler,
+		},
+		{
+			MethodName: "GetTag",
+			Handler:    _PostsService_GetTag_Handler,
+		},
+		{
+			MethodName: "GetTags",
+			Handler:    _PostsService_GetTags_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

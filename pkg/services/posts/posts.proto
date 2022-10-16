@@ -13,6 +13,8 @@ service PostsService {
   rpc GetComment (GetCommentRequest) returns (GetCommentReply) {}
   rpc GetComments(GetCommentsRequest) returns (GetCommentsReply) {}
   rpc GetCommentsStream(stream GetCommentRequest) returns (stream GetCommentReply) {}
+  rpc GetTag (GetTagRequest) returns (GetTagReply) {}
+  rpc GetTags(GetTagsRequest) returns (GetTagsReply) {}
 }
 
 message GetPostRequest {
@@ -28,7 +30,7 @@ message GetPostReply {
   string state = 6;
   google.protobuf.Timestamp createDate = 7;
   google.protobuf.Timestamp lastUpdateDate = 8;
-  repeated string tags = 9;
+  repeated int32 tagIds = 9;
 }
 
 message GetPostsRequest {
@@ -73,4 +75,25 @@ message GetCommentsReply {
   int32 offset = 2;
   int32 limit = 3;
   repeated GetCommentReply comments = 4;
+}
+
+message GetTagRequest {
+  int32 id = 1;
+}
+
+message GetTagReply {
+  int32 id = 1;
+  string name = 2;
+}
+
+message GetTagsRequest {
+  int32 offset = 1;
+  int32 limit = 2;
+}
+
+message GetTagsReply {
+  int32 count = 1;
+  int32 offset = 2;
+  int32 limit = 3;
+  repeated GetTagReply tags = 4;
 }

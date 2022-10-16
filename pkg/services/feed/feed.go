@@ -20,7 +20,7 @@ type FeedPostDTO struct {
 	State          string
 	CreateDate     time.Time
 	LastUpdateDate time.Time
-	Tags           []string
+	Tags           []FeedTagDTO
 }
 
 type FeedCommentDTO struct {
@@ -43,6 +43,11 @@ type FeedUserDTO struct {
 	State          string
 	CreateDate     time.Time
 	LastUpdateDate time.Time
+}
+
+type FeedTagDTO struct {
+	Id   int
+	Name string
 }
 
 type FeedBuilderGRPCService struct {
@@ -96,7 +101,7 @@ func (s *FeedBuilderGRPCService) CreatePost(post *FeedPostDTO) error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
-	_, err := s.client.CreatePost(ctx, toCreatePostRequest(post))
+	_, err := s.client.CreatePost(ctx, ToCreatePostRequest(post))
 	return err
 }
 
@@ -111,7 +116,7 @@ func (s *FeedBuilderGRPCService) UpdatePost(post *FeedPostDTO) error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
-	_, err := s.client.UpdatePost(ctx, toUpdatePostRequest(post))
+	_, err := s.client.UpdatePost(ctx, ToUpdatePostRequest(post))
 	return err
 }
 
@@ -141,7 +146,7 @@ func (s *FeedBuilderGRPCService) CreateComment(comment *FeedCommentDTO) error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
-	_, err := s.client.CreateComment(ctx, toCreateCommentRequest(comment))
+	_, err := s.client.CreateComment(ctx, ToCreateCommentRequest(comment))
 	return err
 }
 
@@ -156,7 +161,7 @@ func (s *FeedBuilderGRPCService) UpdateComment(comment *FeedCommentDTO) error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
-	_, err := s.client.UpdateComment(ctx, toUpdateCommentRequest(comment))
+	_, err := s.client.UpdateComment(ctx, ToUpdateCommentRequest(comment))
 	return err
 }
 
@@ -185,11 +190,40 @@ func (s *FeedBuilderGRPCService) UpdateUser(user *FeedUserDTO) error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
-	_, err := s.client.UpdateUser(ctx, toUpdateUserRequest(user))
+	_, err := s.client.UpdateUser(ctx, ToUpdateUserRequest(user))
+	return err
+}
+func (s *FeedBuilderGRPCService) CreateTag(tag *FeedTagDTO) error {
+	if s.connection == nil {
+		err := s.connect()
+		if err != nil {
+			return fmt.Errorf("could not CreateTag: %v", err)
+		}
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
+	defer cancel()
+
+	_, err := s.client.CreateTag(ctx, ToCreateTagRequest(tag))
 	return err
 }
 
-func toCreatePostRequest(post *FeedPostDTO) *CreatePostRequest {
+func (s *FeedBuilderGRPCService) UpdateTag(tag *FeedTagDTO) error {
+	if s.connection == nil {
+		err := s.connect()
+		if err != nil {
+			return fmt.Errorf("could not UpdateTag: %v", err)
+		}
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
+	defer cancel()
+
+	_, err := s.client.UpdateTag(ctx, ToUpdateTagRequest(tag))
+	return err
+}
+
+func ToCreatePostRequest(post *FeedPostDTO) *CreatePostRequest {
 	return &CreatePostRequest{
 		Uuid:           post.Uuid,
 		AuthorUuid:     post.AuthorUuid,
@@ -199,11 +233,11 @@ func toCreatePostRequest(post *FeedPostDTO) *CreatePostRequest {
 		State:          post.State,
 		CreateDate:     timestamppb.New(post.CreateDate),
 		LastUpdateDate: timestamppb.New(post.LastUpdateDate),
-		Tags:           post.Tags,
+		TagIds:         ToTagIds(post.Tags),
 	}
 }
 
-func toUpdatePostRequest(post *FeedPostDTO) *UpdatePostRequest {
+func ToUpdatePostRequest(post *FeedPostDTO) *UpdatePostRequest {
 	return &UpdatePostRequest{
 		Uuid:           post.Uuid,
 		AuthorUuid:     post.AuthorUuid,
@@ -213,11 +247,11 @@ func toUpdatePostRequest(post *FeedPostDTO) *UpdatePostRequest {
 		State:          post.State,
 		CreateDate:     timestamppb.New(post.CreateDate),
 		LastUpdateDate: timestamppb.New(post.LastUpdateDate),
-		Tags:           post.Tags,
+		TagIds:         ToTagIds(post.Tags),
 	}
 }
 
-func toCreateCommentRequest(comment *FeedCommentDTO) *CreateCommentRequest {
+func ToCreateCommentRequest(comment *FeedCommentDTO) *CreateCommentRequest {
 	return &CreateCommentRequest{
 		Id:                int32(comment.Id),
 		Uuid:              comment.Uuid,
@@ -231,7 +265,7 @@ func toCreateCommentRequest(comment *FeedCommentDTO) *CreateCommentRequest {
 	}
 }
 
-func toUpdateCommentRequest(comment *FeedCommentDTO) *UpdateCommentRequest {
+func ToUpdateCommentRequest(comment *FeedCommentDTO) *UpdateCommentRequest {
 	return &UpdateCommentRequest{
 		Id:                int32(comment.Id),
 		Uuid:              comment.Uuid,
@@ -245,7 +279,7 @@ func toUpdateCommentRequest(comment *FeedCommentDTO) *UpdateCommentRequest {
 	}
 }
 
-func toUpdateUserRequest(user *FeedUserDTO) *UpdateUserRequest {
+func ToUpdateUserRequest(user *FeedUserDTO) *UpdateUserRequest {
 	return &UpdateUserRequest{
 		Uuid:  user.Uuid,
 		Login: user.Login,
@@ -253,4 +287,26 @@ func toUpdateUserRequest(user *FeedUserDTO) *UpdateUserRequest {
 		Role:  user.Role,
 		State: user.State,
 	}
+}
+
+func ToCreateTagRequest(tag *FeedTagDTO) *CreateTagRequest {
+	return &CreateTagRequest{
+		Id:   int32(tag.Id),
+		Name: tag.Name,
+	}
+}
+
+func ToUpdateTagRequest(tag *FeedTagDTO) *UpdateTagRequest {
+	return &UpdateTagRequest{
+		Id:   int32(tag.Id),
+		Name: tag.Name,
+	}
+}
+
+func ToTagIds(dto []FeedTagDTO) []int32 {
+	result := make([]int32, 0, len(dto))
+	for _, tag := range dto {
+		result = append(result, int32(tag.Id))
+	}
+	return result
 }
