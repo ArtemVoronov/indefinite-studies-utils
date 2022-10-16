@@ -114,3 +114,23 @@ func Int32SliceToIntSlice(input []int32) []int {
 	}
 	return result
 }
+
+func ToInt32(in []int) []int32 {
+	result := make([]int32, 0, len(in))
+
+	for _, p := range in {
+		result = append(result, int32(p))
+	}
+
+	return result
+}
+
+func ToInt(in []int32) []int {
+	result := make([]int, 0, len(in))
+
+	for _, p := range in {
+		result = append(result, int(p))
+	}
+
+	return result
+}

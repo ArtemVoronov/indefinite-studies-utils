@@ -6,6 +6,7 @@ import (
 	"io"
 	"time"
 
+	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/utils"
 	grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
@@ -96,7 +97,7 @@ func (s *PostsGRPCService) GetPost(postUuid string) (*GetPostResult, error) {
 		return nil, fmt.Errorf("could not GetPost: %v", err)
 	}
 
-	result := ToGetPostsResult(reply)
+	result := ToGetPostResult(reply)
 
 	return &result, nil
 }
@@ -152,7 +153,7 @@ func (s *PostsGRPCService) GetPostsStream(postUuids []string) (<-chan (GetPostRe
 				resultErr = fmt.Errorf("s.client.GetPostsStream: stream.Recv failed: %v", err)
 				return
 			}
-			result <- ToGetPostsResult(in)
+			result <- ToGetPostResult(in)
 		}
 	}()
 	for _, postUuid := range postUuids {
@@ -297,7 +298,7 @@ func (s *PostsGRPCService) GetTags(offset int32, limit int32) (*GetTagsReply, er
 	return reply, nil
 }
 
-func ToGetPostsResult(post *GetPostReply) GetPostResult {
+func ToGetPostResult(post *GetPostReply) GetPostResult {
 	return GetPostResult{
 		Uuid:           post.GetUuid(),
 		AuthorUuid:     post.GetAuthorUuid(),
@@ -307,7 +308,7 @@ func ToGetPostsResult(post *GetPostReply) GetPostResult {
 		State:          post.GetState(),
 		CreateDate:     post.GetCreateDate().AsTime(),
 		LastUpdateDate: post.GetLastUpdateDate().AsTime(),
-		TagIds:         ToInt(post.TagIds),
+		TagIds:         utils.ToInt(post.TagIds),
 	}
 }
 
@@ -329,7 +330,7 @@ func ToGetPostsResultSlice(posts []*GetPostReply) []GetPostResult {
 	result := []GetPostResult{}
 
 	for _, p := range posts {
-		result = append(result, ToGetPostsResult(p))
+		result = append(result, ToGetPostResult(p))
 	}
 
 	return result
@@ -347,26 +348,6 @@ func ToGetTagResultSlice(tags []*GetTagReply) []GetTagResult {
 
 	for _, p := range tags {
 		result = append(result, ToGetTagResult(p))
-	}
-
-	return result
-}
-
-func ToInt32(in []int) []int32 {
-	result := make([]int32, 0, len(in))
-
-	for _, p := range in {
-		result = append(result, int32(p))
-	}
-
-	return result
-}
-
-func ToInt(in []int32) []int {
-	result := make([]int, 0, len(in))
-
-	for _, p := range in {
-		result = append(result, int(p))
 	}
 
 	return result

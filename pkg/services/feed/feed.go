@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/utils"
 	grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
@@ -20,7 +21,7 @@ type FeedPostDTO struct {
 	State          string
 	CreateDate     time.Time
 	LastUpdateDate time.Time
-	Tags           []FeedTagDTO
+	TagIds         []int
 }
 
 type FeedCommentDTO struct {
@@ -233,7 +234,7 @@ func ToCreatePostRequest(post *FeedPostDTO) *CreatePostRequest {
 		State:          post.State,
 		CreateDate:     timestamppb.New(post.CreateDate),
 		LastUpdateDate: timestamppb.New(post.LastUpdateDate),
-		TagIds:         ToTagIds(post.Tags),
+		TagIds:         utils.ToInt32(post.TagIds),
 	}
 }
 
@@ -247,7 +248,7 @@ func ToUpdatePostRequest(post *FeedPostDTO) *UpdatePostRequest {
 		State:          post.State,
 		CreateDate:     timestamppb.New(post.CreateDate),
 		LastUpdateDate: timestamppb.New(post.LastUpdateDate),
-		TagIds:         ToTagIds(post.Tags),
+		TagIds:         utils.ToInt32(post.TagIds),
 	}
 }
 
