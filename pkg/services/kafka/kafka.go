@@ -45,7 +45,7 @@ func (s *KafkaConsumerService) Shutdown() error {
 	return s.consumer.Close()
 }
 
-func (s KafkaProducerService) CreateMessage(topic string, message string, partition int32) error {
+func (s KafkaProducerService) CreateMessage(topic string, message string) error {
 	return s.CreateMessageWithinPartition(topic, message, kafka.PartitionAny)
 }
 
