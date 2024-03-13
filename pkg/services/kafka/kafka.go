@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ArtemVoronov/indefinite-studies-utils/pkg/log"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
@@ -44,12 +45,12 @@ func (s *KafkaConsumerService) Shutdown() error {
 	return s.consumer.Close()
 }
 
-func (s KafkaProducerService) CreateMessage(topic string, message string) error {
+func (s KafkaProducerService) CreateMessage(topic string, message string, partition int32) error {
 	deliveryChan := make(chan kafka.Event)
 	defer close(deliveryChan)
 
 	err := s.producer.Produce(&kafka.Message{
-		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
+		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: partition},
 		Value:          []byte(message),
 	}, deliveryChan)
 
@@ -60,13 +61,11 @@ func (s KafkaProducerService) CreateMessage(topic string, message string) error 
 	m := e.(*kafka.Message)
 
 	if m.TopicPartition.Error != nil {
-		// TODO: clean
-		fmt.Printf("Delivery failed: %v\n", m.TopicPartition.Error)
+		log.Error("Delivery failed", m.TopicPartition.Error.Error())
 		return m.TopicPartition.Error
 	}
 
-	// TODO: clean
-	fmt.Printf("Delivered message to topic %s [%d] at offset %v\n", *m.TopicPartition.Topic, m.TopicPartition.Partition, m.TopicPartition.Offset)
+	log.Debug(fmt.Sprintf("Delivered message to topic %s [%d] at offset %v\n", *m.TopicPartition.Topic, m.TopicPartition.Partition, m.TopicPartition.Offset))
 
 	return nil
 }
