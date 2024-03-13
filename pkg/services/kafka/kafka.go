@@ -46,6 +46,10 @@ func (s *KafkaConsumerService) Shutdown() error {
 }
 
 func (s KafkaProducerService) CreateMessage(topic string, message string, partition int32) error {
+	return s.CreateMessageWithinPartition(topic, message, kafka.PartitionAny)
+}
+
+func (s KafkaProducerService) CreateMessageWithinPartition(topic string, message string, partition int32) error {
 	deliveryChan := make(chan kafka.Event)
 	defer close(deliveryChan)
 
