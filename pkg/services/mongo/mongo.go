@@ -21,15 +21,10 @@ type MongoService struct {
 	client         *mongo.Client
 }
 
-func (s *MongoService) ShutDown() {
+func (s *MongoService) ShutDown() error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.connectTimeout)
 	defer cancel()
-	defer func() {
-		err := s.client.Disconnect(ctx)
-		if err != nil {
-			log.Error("mongo client unable to disconnect", err.Error())
-		}
-	}()
+	return s.client.Disconnect(ctx)
 }
 
 func (s *MongoService) GetCollection(dbName string, collectionName string) *mongo.Collection {
