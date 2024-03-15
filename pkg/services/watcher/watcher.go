@@ -29,7 +29,6 @@ func CreateWatcherService(kafkaHostname string, kafkaGroupId string, topic strin
 	go func() {
 		for e := range kafkaMessagesChan {
 			onGetKafkaMessage(e)
-
 		}
 	}()
 	go func() {

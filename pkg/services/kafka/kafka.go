@@ -74,27 +74,27 @@ func (s KafkaProducerService) CreateMessageWithinPartition(topic string, message
 	return nil
 }
 
-func (s KafkaConsumerService) SubscribeTopics(quit <-chan struct{}, topic string, regexp string, pollPeriod time.Duration) (chan *kafka.Message, chan error) {
+func (s KafkaConsumerService) SubscribeTopics(quit <-chan struct{}, topics []string, pollPeriod time.Duration) (chan *kafka.Message, chan error) {
 	out := make(chan *kafka.Message)
 	outErr := make(chan error)
 
-	s.consumer.SubscribeTopics([]string{topic, regexp}, nil)
+	s.consumer.SubscribeTopics(topics, nil)
 
 	go func() {
+		defer close(out)
+		defer close(outErr)
 		for {
 			select {
 			case <-quit:
 				fmt.Printf("kafka consumer quit\n")
 				return
-
 			default:
 				msg, err := s.consumer.ReadMessage(pollPeriod)
 				if err == nil {
 					out <- msg
-				} else {
+				} else if err.(kafka.Error).Code() != kafka.ErrTimedOut {
 					outErr <- fmt.Errorf("consumer error: %s", err)
 				}
-
 			}
 		}
 	}()
@@ -113,6 +113,8 @@ func (s *KafkaConsumerService) PollTopics(quit <-chan struct{}, topic string, po
 	s.consumer.SubscribeTopics([]string{topic}, nil)
 
 	go func() {
+		defer close(out)
+		defer close(outErr)
 		for {
 			select {
 			case <-quit:
