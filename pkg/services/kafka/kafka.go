@@ -74,11 +74,16 @@ func (s KafkaProducerService) CreateMessageWithinPartition(topic string, message
 	return nil
 }
 
-func (s KafkaConsumerService) SubscribeTopics(quit <-chan struct{}, topics []string, pollPeriod time.Duration) (chan *kafka.Message, chan error) {
+func (s KafkaConsumerService) SubscribeTopics(quit <-chan struct{}, topics []string, pollPeriod time.Duration) (chan *kafka.Message, chan error, error) {
 	out := make(chan *kafka.Message)
 	outErr := make(chan error)
 
-	s.consumer.SubscribeTopics(topics, nil)
+	err := s.consumer.SubscribeTopics(topics, nil)
+	if err != nil {
+		defer close(out)
+		defer close(outErr)
+		return nil, nil, err
+	}
 
 	go func() {
 		defer close(out)
@@ -86,7 +91,7 @@ func (s KafkaConsumerService) SubscribeTopics(quit <-chan struct{}, topics []str
 		for {
 			select {
 			case <-quit:
-				fmt.Printf("kafka consumer quit\n")
+				log.Debug("kafka consumer quit")
 				return
 			default:
 				msg, err := s.consumer.ReadMessage(pollPeriod)
@@ -99,18 +104,23 @@ func (s KafkaConsumerService) SubscribeTopics(quit <-chan struct{}, topics []str
 		}
 	}()
 
-	return out, outErr
+	return out, outErr, nil
 }
 
-func (s *KafkaConsumerService) Unsubscribe() {
-	s.consumer.Unsubscribe()
+func (s *KafkaConsumerService) Unsubscribe() error {
+	return s.consumer.Unsubscribe()
 }
 
-func (s *KafkaConsumerService) PollTopics(quit <-chan struct{}, topic string, pollPeriodInMillis int) (chan *kafka.Message, chan error) {
+func (s *KafkaConsumerService) PollTopics(quit <-chan struct{}, topic string, pollPeriodInMillis int) (chan *kafka.Message, chan error, error) {
 	out := make(chan *kafka.Message)
 	outErr := make(chan error)
 
-	s.consumer.SubscribeTopics([]string{topic}, nil)
+	err := s.consumer.SubscribeTopics([]string{topic}, nil)
+	if err != nil {
+		defer close(out)
+		defer close(outErr)
+		return nil, nil, err
+	}
 
 	go func() {
 		defer close(out)
@@ -118,7 +128,7 @@ func (s *KafkaConsumerService) PollTopics(quit <-chan struct{}, topic string, po
 		for {
 			select {
 			case <-quit:
-				fmt.Printf("kafka consumer quit\n")
+				log.Debug("kafka consumer quit")
 				return
 
 			default:
@@ -140,5 +150,5 @@ func (s *KafkaConsumerService) PollTopics(quit <-chan struct{}, topic string, po
 		}
 	}()
 
-	return out, outErr
+	return out, outErr, nil
 }
