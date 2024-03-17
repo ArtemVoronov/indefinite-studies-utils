@@ -16,13 +16,13 @@ import (
 )
 
 type MongoService struct {
-	connectTimeout time.Duration
-	queryTimeout   time.Duration
+	ConnectTimeout time.Duration
+	QueryTimeout   time.Duration
 	client         *mongo.Client
 }
 
 func (s *MongoService) ShutDown() error {
-	ctx, cancel := context.WithTimeout(context.Background(), s.connectTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), s.ConnectTimeout)
 	defer cancel()
 	return s.client.Disconnect(ctx)
 }
@@ -34,7 +34,7 @@ func (s *MongoService) GetCollection(dbName string, collectionName string) *mong
 func (s *MongoService) Insert(dbName string, collectionName string, document interface{}) (*primitive.ObjectID, error) {
 	collection := s.GetCollection(dbName, collectionName)
 
-	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), s.QueryTimeout)
 	defer cancel()
 
 	insertResult, err := collection.InsertOne(ctx, document)
@@ -53,7 +53,7 @@ func (s *MongoService) Insert(dbName string, collectionName string, document int
 func (s *MongoService) Upsert(dbName string, collectionName string, filter any, update interface{}) (*primitive.ObjectID, error) {
 	collection := s.GetCollection(dbName, collectionName)
 
-	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), s.QueryTimeout)
 	defer cancel()
 
 	opts := options.Update().SetUpsert(true)
@@ -80,7 +80,7 @@ func (s *MongoService) Upsert(dbName string, collectionName string, filter any, 
 func (s *MongoService) Delete(dbName string, collectionName string, filter bson.D) error {
 	collection := s.GetCollection(dbName, collectionName)
 
-	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), s.QueryTimeout)
 	defer cancel()
 
 	_, err := collection.DeleteOne(ctx, filter)
@@ -88,10 +88,6 @@ func (s *MongoService) Delete(dbName string, collectionName string, filter bson.
 		return fmt.Errorf("unable to delete document. filter: '%#v'. Error: %v", filter, err)
 	}
 	return err
-}
-
-func (s *MongoService) GetQueryTimeout() time.Duration {
-	return s.queryTimeout
 }
 
 func CreateMongoService() *MongoService {
@@ -102,8 +98,8 @@ func CreateMongoService() *MongoService {
 		log.Error("unable to setup mongo service", err.Error())
 	}
 	return &MongoService{
-		connectTimeout: connectTimeout,
-		queryTimeout:   queryTimeout,
+		ConnectTimeout: connectTimeout,
+		QueryTimeout:   queryTimeout,
 		client:         client,
 	}
 }
@@ -161,7 +157,7 @@ type QueryFuncVoid func(sc mongo.SessionContext) error
 
 func (s *MongoService) Tx(f QueryFuncVoid) func() error {
 
-	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), s.QueryTimeout)
 	defer cancel()
 
 	return func() error {
