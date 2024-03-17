@@ -50,18 +50,16 @@ func (s *MongoService) Insert(dbName string, collectionName string, document int
 	return &result, nil
 }
 
-func (s *MongoService) Upsert(dbName string, collectionName string, id primitive.ObjectID, document interface{}) (*primitive.ObjectID, error) {
+func (s *MongoService) Upsert(dbName string, collectionName string, filter any, update interface{}) (*primitive.ObjectID, error) {
 	collection := s.GetCollection(dbName, collectionName)
 
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
 	opts := options.Update().SetUpsert(true)
-	filter := bson.D{{"_id", id}}
-	update := bson.D{{"$set", document}}
 	result, err := collection.UpdateOne(ctx, filter, update, opts)
 	if err != nil {
-		return nil, fmt.Errorf("unable to update document. ID: '%v'. Document: '%v'. Error: %v", id, document, err)
+		return nil, fmt.Errorf("unable to update document. Filter: '%#v'. Update: '%v'. Error: %v", filter, update, err)
 	}
 
 	if result.MatchedCount != 0 {
@@ -79,15 +77,15 @@ func (s *MongoService) Upsert(dbName string, collectionName string, id primitive
 	return nil, nil
 }
 
-func (s *MongoService) Delete(dbName string, collectionName string, id primitive.ObjectID) error {
+func (s *MongoService) Delete(dbName string, collectionName string, filter bson.D) error {
 	collection := s.GetCollection(dbName, collectionName)
 
 	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
 	defer cancel()
 
-	_, err := collection.DeleteOne(ctx, bson.M{"_id": id})
+	_, err := collection.DeleteOne(ctx, filter)
 	if err != nil {
-		return fmt.Errorf("unable to delete document. ID: '%v'. Error: %v", id, err)
+		return fmt.Errorf("unable to delete document. filter: '%#v'. Error: %v", filter, err)
 	}
 	return err
 }

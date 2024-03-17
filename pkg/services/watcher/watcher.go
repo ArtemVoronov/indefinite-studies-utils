@@ -20,11 +20,17 @@ func CreateWatcherService(kafkaHostname string, kafkaGroupId string, topic strin
 	kafkaConsumer, err := kafkaService.CreateKafkaConsumerService(kafkaHostname, kafkaGroupId)
 	if err != nil {
 		log.Fatalf("unable to create kafka consumer: %s", err)
+		return nil
 	}
 
 	quit := make(chan struct{})
 
-	kafkaMessagesChan, kafkaErrorsChan := kafkaConsumer.PollTopics(quit, topic, pollPeriodInMillis)
+	kafkaMessagesChan, kafkaErrorsChan, err := kafkaConsumer.PollTopics(quit, topic, pollPeriodInMillis)
+	if err != nil {
+		defer close(quit)
+		log.Fatalf("unable to pull topics: %s", err)
+		return nil
+	}
 
 	go func() {
 		for e := range kafkaMessagesChan {
