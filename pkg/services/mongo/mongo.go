@@ -77,7 +77,7 @@ func (s *MongoService) Upsert(dbName string, collectionName string, filter any, 
 	return nil, nil
 }
 
-func (s *MongoService) QueryCollectionNames(databaseName string) ([]string, error) {
+func (s *MongoService) GetCollectionNames(databaseName string) ([]string, error) {
 	db := s.client.Database(databaseName)
 
 	ctx, cancel := context.WithTimeout(context.Background(), s.QueryTimeout)
