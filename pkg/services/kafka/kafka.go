@@ -45,11 +45,11 @@ func (s *KafkaConsumerService) Shutdown() error {
 	return s.consumer.Close()
 }
 
-func (s KafkaProducerService) CreateMessage(topic string, message string) error {
+func (s *KafkaProducerService) CreateMessage(topic string, message string) error {
 	return s.CreateMessageWithinPartition(topic, message, kafka.PartitionAny)
 }
 
-func (s KafkaProducerService) CreateMessageWithinPartition(topic string, message string, partition int32) error {
+func (s *KafkaProducerService) CreateMessageWithinPartition(topic string, message string, partition int32) error {
 	deliveryChan := make(chan kafka.Event)
 	defer close(deliveryChan)
 
@@ -74,7 +74,7 @@ func (s KafkaProducerService) CreateMessageWithinPartition(topic string, message
 	return nil
 }
 
-func (s KafkaConsumerService) SubscribeTopics(quit <-chan struct{}, topics []string, pollPeriod time.Duration) (chan *kafka.Message, chan error, error) {
+func (s *KafkaConsumerService) SubscribeTopics(quit <-chan struct{}, topics []string, pollPeriod time.Duration) (chan *kafka.Message, chan error, error) {
 	out := make(chan *kafka.Message)
 	outErr := make(chan error)
 
