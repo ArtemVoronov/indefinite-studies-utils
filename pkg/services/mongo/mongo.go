@@ -54,7 +54,7 @@ func (s *MongoService) Upsert(dbName string, collectionName string, filter any, 
 	return s.update(dbName, collectionName, filter, update, true)
 }
 
-func (s *MongoService) Update(dbName string, collectionName string, filter any, update interface{}, isUpsert bool) error {
+func (s *MongoService) Update(dbName string, collectionName string, filter any, update interface{}) error {
 	_, err := s.update(dbName, collectionName, filter, update, false)
 	return err
 }
