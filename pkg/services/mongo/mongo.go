@@ -51,30 +51,12 @@ func (s *MongoService) Insert(dbName string, collectionName string, document int
 }
 
 func (s *MongoService) Upsert(dbName string, collectionName string, filter any, update interface{}) (*primitive.ObjectID, error) {
-	collection := s.GetCollection(dbName, collectionName)
+	return s.update(dbName, collectionName, filter, update, true)
+}
 
-	ctx, cancel := context.WithTimeout(context.Background(), s.QueryTimeout)
-	defer cancel()
-
-	opts := options.Update().SetUpsert(true)
-	result, err := collection.UpdateOne(ctx, filter, update, opts)
-	if err != nil {
-		return nil, fmt.Errorf("unable to update document. Filter: '%#v'. Update: '%v'. Error: %v", filter, update, err)
-	}
-
-	if result.MatchedCount != 0 {
-		return nil, nil
-	}
-
-	if result.UpsertedCount != 0 {
-		id, ok := result.UpsertedID.(primitive.ObjectID)
-		if !ok {
-			return nil, fmt.Errorf("unable to update document: %s", api.ERROR_ASSERT_RESULT_TYPE)
-		}
-		return &id, nil
-	}
-
-	return nil, nil
+func (s *MongoService) Update(dbName string, collectionName string, filter any, update interface{}, isUpsert bool) error {
+	_, err := s.update(dbName, collectionName, filter, update, false)
+	return err
 }
 
 func (s *MongoService) GetCollectionNames(databaseName string) ([]string, error) {
@@ -98,6 +80,33 @@ func (s *MongoService) Delete(dbName string, collectionName string, filter bson.
 		return fmt.Errorf("unable to delete document. filter: '%#v'. Error: %v", filter, err)
 	}
 	return err
+}
+
+func (s *MongoService) update(dbName string, collectionName string, filter any, update interface{}, isUpsert bool) (*primitive.ObjectID, error) {
+	collection := s.GetCollection(dbName, collectionName)
+
+	ctx, cancel := context.WithTimeout(context.Background(), s.QueryTimeout)
+	defer cancel()
+
+	opts := options.Update().SetUpsert(isUpsert)
+	result, err := collection.UpdateOne(ctx, filter, update, opts)
+	if err != nil {
+		return nil, fmt.Errorf("unable to update document. Filter: '%#v'. Update: '%v'. Error: %v", filter, update, err)
+	}
+
+	if result.MatchedCount != 0 {
+		return nil, nil
+	}
+
+	if isUpsert && result.UpsertedCount != 0 {
+		id, ok := result.UpsertedID.(primitive.ObjectID)
+		if !ok {
+			return nil, fmt.Errorf("unable to update document: %s", api.ERROR_ASSERT_RESULT_TYPE)
+		}
+		return &id, nil
+	}
+
+	return nil, nil
 }
 
 func CreateMongoService() *MongoService {
