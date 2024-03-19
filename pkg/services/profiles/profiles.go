@@ -3,7 +3,6 @@ package profiles
 import (
 	context "context"
 	"fmt"
-	"io"
 	"time"
 
 	grpc "google.golang.org/grpc"
@@ -110,70 +109,6 @@ func (s *ProfilesGRPCService) GetUser(userUuid string) (*GetUserResult, error) {
 	return &result, nil
 }
 
-func (s *ProfilesGRPCService) GetUsers(offset int32, limit int32, shard int32) (*GetUsersReply, error) {
-	if s.connection == nil {
-		err := s.connect()
-		if err != nil {
-			return nil, fmt.Errorf("could not GetUsers: %v", err)
-		}
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
-	defer cancel()
-
-	reply, err := s.client.GetUsers(ctx, &GetUsersRequest{Offset: offset, Limit: limit, Shard: shard})
-	if err != nil {
-		return nil, fmt.Errorf("could not GetUsers: %v", err)
-	}
-	return reply, nil
-}
-
-func (s *ProfilesGRPCService) GetUsersStream(userUuids []string) (<-chan (GetUserResult), error) {
-	var result chan (GetUserResult) = make(chan GetUserResult)
-	var resultErr error
-	if s.connection == nil {
-		err := s.connect()
-		if err != nil {
-			return result, fmt.Errorf("could not GetUsersStream: %v", err)
-		}
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), s.queryTimeout)
-	defer cancel()
-
-	stream, err := s.client.GetUsersStream(ctx)
-	if err != nil {
-		return result, fmt.Errorf("could not GetUsersStream: %v", err)
-	}
-	defer stream.CloseSend()
-
-	if err != nil {
-		return result, fmt.Errorf("s.client.GetUsersStream failed: %v", err)
-	}
-	go func() {
-		defer close(result)
-		for {
-			in, err := stream.Recv()
-			if err == io.EOF {
-				return
-			}
-			if err != nil {
-				resultErr = fmt.Errorf("s.client.GetUsersStream: stream.Recv failed: %v", err)
-				return
-			}
-			result <- ToGetUserResult(in)
-		}
-	}()
-	for _, userUuid := range userUuids {
-		err := stream.Send(&GetUserRequest{Uuid: userUuid})
-		if err != nil {
-			resultErr = fmt.Errorf("s.client.GetUsersStream: stream.Send(%v) failed: %v", userUuid, err)
-			return result, resultErr
-		}
-	}
-	return result, resultErr
-}
-
 func ToCredentialsValidationResult(reply *ValidateCredentialsReply) CredentialsValidationResult {
 	return CredentialsValidationResult{
 		IsValid:  reply.GetIsValid(),
@@ -181,6 +116,7 @@ func ToCredentialsValidationResult(reply *ValidateCredentialsReply) CredentialsV
 		Role:     reply.GetRole(),
 	}
 }
+
 func ToGetUserResult(reply *GetUserReply) GetUserResult {
 	return GetUserResult{
 		Id:             int(reply.GetId()),
@@ -192,14 +128,4 @@ func ToGetUserResult(reply *GetUserReply) GetUserResult {
 		CreateDate:     reply.GetCreateDate().AsTime(),
 		LastUpdateDate: reply.GetLastUpdateDate().AsTime(),
 	}
-}
-
-func ToGetGetUserResultSlice(replies []*GetUserReply) []GetUserResult {
-	result := []GetUserResult{}
-
-	for _, p := range replies {
-		result = append(result, ToGetUserResult(p))
-	}
-
-	return result
 }
