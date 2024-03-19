@@ -1,6 +1,7 @@
 package kafka
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -16,8 +17,15 @@ type KafkaConsumerService struct {
 	consumer *kafka.Consumer
 }
 
+type KafkaAdminService struct {
+	QueryTimeout time.Duration
+	admin        *kafka.AdminClient
+}
+
 func CreateKafkaProducerService(hostname string) (*KafkaProducerService, error) {
-	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": hostname})
+	p, err := kafka.NewProducer(&kafka.ConfigMap{
+		"bootstrap.servers": hostname,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -36,6 +44,16 @@ func CreateKafkaConsumerService(hostname string, groupId string) (*KafkaConsumer
 	return &KafkaConsumerService{consumer: c}, nil
 }
 
+func CreateKafkaAdminService(hostname string, queryTimeout time.Duration) (*KafkaAdminService, error) {
+	a, err := kafka.NewAdminClient(&kafka.ConfigMap{
+		"bootstrap.servers": hostname,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &KafkaAdminService{admin: a, QueryTimeout: queryTimeout}, nil
+}
+
 func (s *KafkaProducerService) Shutdown() error {
 	s.producer.Close()
 	return nil
@@ -43,6 +61,11 @@ func (s *KafkaProducerService) Shutdown() error {
 
 func (s *KafkaConsumerService) Shutdown() error {
 	return s.consumer.Close()
+}
+
+func (s *KafkaAdminService) Shutdown() error {
+	s.admin.Close()
+	return nil
 }
 
 func (s *KafkaProducerService) CreateMessage(topic string, message string) error {
@@ -74,20 +97,8 @@ func (s *KafkaProducerService) CreateMessageWithinPartition(topic string, messag
 	return nil
 }
 
-func (s *KafkaConsumerService) SubscribeTopics(quit <-chan struct{}, topics []string, pollPeriod time.Duration) (chan *kafka.Message, chan error, error) {
-	out := make(chan *kafka.Message)
-	outErr := make(chan error)
-
-	err := s.consumer.SubscribeTopics(topics, nil)
-	if err != nil {
-		defer close(out)
-		defer close(outErr)
-		return nil, nil, err
-	}
-
+func (s *KafkaConsumerService) StartReadingMessages(quit <-chan struct{}, out chan *kafka.Message, outErr chan error, topics []string, pollPeriod time.Duration) {
 	go func() {
-		defer close(out)
-		defer close(outErr)
 		for {
 			select {
 			case <-quit:
@@ -103,52 +114,33 @@ func (s *KafkaConsumerService) SubscribeTopics(quit <-chan struct{}, topics []st
 			}
 		}
 	}()
+}
 
-	return out, outErr, nil
+func (s *KafkaConsumerService) SubscribeTopics(topics []string) error {
+	return s.consumer.SubscribeTopics(topics, nil)
 }
 
 func (s *KafkaConsumerService) Unsubscribe() error {
 	return s.consumer.Unsubscribe()
 }
 
-func (s *KafkaConsumerService) PollTopics(quit <-chan struct{}, topic string, pollPeriodInMillis int) (chan *kafka.Message, chan error, error) {
-	out := make(chan *kafka.Message)
-	outErr := make(chan error)
+func (s *KafkaAdminService) CreateTopics(topics []string, numPartitions int) error {
+	specs := make([]kafka.TopicSpecification, 0, len(topics))
 
-	err := s.consumer.SubscribeTopics([]string{topic}, nil)
-	if err != nil {
-		defer close(out)
-		defer close(outErr)
-		return nil, nil, err
+	for _, topic := range topics {
+		spec := kafka.TopicSpecification{
+			Topic:         topic,
+			NumPartitions: numPartitions,
+		}
+		specs = append(specs, spec)
 	}
 
-	go func() {
-		defer close(out)
-		defer close(outErr)
-		for {
-			select {
-			case <-quit:
-				log.Debug("kafka consumer quit")
-				return
+	ctx, cancel := context.WithTimeout(context.Background(), s.QueryTimeout)
+	defer cancel()
 
-			default:
-				ev := s.consumer.Poll(pollPeriodInMillis)
-				if ev == nil {
-					continue
-				}
-
-				switch e := ev.(type) {
-				case *kafka.Message:
-					out <- e
-				case kafka.Error:
-					outErr <- fmt.Errorf("consumer error: %s", e)
-				default:
-					// TODO: check if need other event types
-					// fmt.Printf("Ignored %v\n", e)
-				}
-			}
-		}
-	}()
-
-	return out, outErr, nil
+	_, err := s.admin.CreateTopics(ctx, specs)
+	if err != nil {
+		return err
+	}
+	return nil
 }
