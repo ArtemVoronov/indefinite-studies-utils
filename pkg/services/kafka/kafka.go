@@ -97,7 +97,7 @@ func (s *KafkaProducerService) CreateMessageWithinPartition(topic string, messag
 	return nil
 }
 
-func (s *KafkaConsumerService) StartReadingMessages(quit <-chan struct{}, out chan *kafka.Message, outErr chan error, topics []string, pollPeriod time.Duration) {
+func (s *KafkaConsumerService) StartReadingMessages(quit <-chan struct{}, out chan *kafka.Message, outErr chan error, pollPeriod time.Duration) {
 	go func() {
 		for {
 			select {
