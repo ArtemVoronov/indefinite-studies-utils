@@ -77,6 +77,16 @@ func (s *MongoService) Upsert(dbName string, collectionName string, filter any, 
 	return nil, nil
 }
 
+func (s *MongoService) QueryCollectionNames(databaseName string) ([]string, error) {
+	db := s.client.Database(databaseName)
+
+	ctx, cancel := context.WithTimeout(context.Background(), s.QueryTimeout)
+	defer cancel()
+
+	filter := bson.D{}
+	return db.ListCollectionNames(ctx, filter)
+}
+
 func (s *MongoService) Delete(dbName string, collectionName string, filter bson.D) error {
 	collection := s.GetCollection(dbName, collectionName)
 
