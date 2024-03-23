@@ -125,6 +125,16 @@ func ToInt32(in []int) []int32 {
 	return result
 }
 
+func ToInt64(in []int) []int64 {
+	result := make([]int64, 0, len(in))
+
+	for _, p := range in {
+		result = append(result, int64(p))
+	}
+
+	return result
+}
+
 func ToInt(in []int64) []int {
 	result := make([]int, 0, len(in))
 
