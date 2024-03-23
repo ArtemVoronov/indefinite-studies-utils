@@ -8,11 +8,7 @@ package posts;
 
 service PostsService {
   rpc GetPost (GetPostRequest) returns (GetPostReply) {}
-  rpc GetPosts(GetPostsRequest) returns (GetPostsReply) {}
-  rpc GetPostsStream(stream GetPostRequest) returns (stream GetPostReply) {}
   rpc GetComment (GetCommentRequest) returns (GetCommentReply) {}
-  rpc GetComments(GetCommentsRequest) returns (GetCommentsReply) {}
-  rpc GetCommentsStream(stream GetCommentRequest) returns (stream GetCommentReply) {}
   rpc GetTag (GetTagRequest) returns (GetTagReply) {}
   rpc GetTags(GetTagsRequest) returns (GetTagsReply) {}
 }
@@ -30,59 +26,31 @@ message GetPostReply {
   string state = 6;
   google.protobuf.Timestamp createDate = 7;
   google.protobuf.Timestamp lastUpdateDate = 8;
-  repeated int32 tagIds = 9;
-}
-
-message GetPostsRequest {
-  int32 offset = 1;
-  int32 limit = 2;
-  int32 shard = 3;
-}
-
-message GetPostsReply {
-  int32 count = 1;
-  int32 offset = 2;
-  int32 limit = 3;
-  int32 shardsCount = 4;
-  repeated GetPostReply posts = 5;
+  repeated int64 tagIds = 9;
 }
 
 message GetCommentRequest {
-  int32 id = 1;
+  int64 id = 1;
   string postUuid = 2;
 }
 
 message GetCommentReply {
-  int32 id = 1;
-  string uuid = 2;
-  string authorUuid = 3;
-  string postUuid = 4;
-  string linkedCommentUuid = 5;
-  string text = 6;
-  string state = 7;
-  google.protobuf.Timestamp createDate = 8;
-  google.protobuf.Timestamp lastUpdateDate = 9;
-}
-
-message GetCommentsRequest {  
-  string postUuid = 1;
-  int32 offset = 2;
-  int32 limit = 3;
-}
-
-message GetCommentsReply {
-  int32 count = 1;
-  int32 offset = 2;
-  int32 limit = 3;
-  repeated GetCommentReply comments = 4;
+  int64 id = 1;
+  string authorUuid = 2;
+  string postUuid = 3;
+  string linkedCommentId = 4;
+  string text = 5;
+  string state = 6;
+  google.protobuf.Timestamp createDate = 7;
+  google.protobuf.Timestamp lastUpdateDate = 8;
 }
 
 message GetTagRequest {
-  int32 id = 1;
+  int64 id = 1;
 }
 
 message GetTagReply {
-  int32 id = 1;
+  int64 id = 1;
   string name = 2;
 }
 

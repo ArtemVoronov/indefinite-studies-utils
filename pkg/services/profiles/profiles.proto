@@ -27,7 +27,7 @@ message GetUserRequest {
 }
 
 message GetUserReply {
-  int32 id = 1;
+  int64 id = 1;
   string uuid = 2;
   string login = 3;
   string email = 4;

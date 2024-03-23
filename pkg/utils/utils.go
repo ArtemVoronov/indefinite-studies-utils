@@ -125,7 +125,7 @@ func ToInt32(in []int) []int32 {
 	return result
 }
 
-func ToInt(in []int32) []int {
+func ToInt(in []int64) []int {
 	result := make([]int, 0, len(in))
 
 	for _, p := range in {

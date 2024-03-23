@@ -23,11 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PostsServiceClient interface {
 	GetPost(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*GetPostReply, error)
-	GetPosts(ctx context.Context, in *GetPostsRequest, opts ...grpc.CallOption) (*GetPostsReply, error)
-	GetPostsStream(ctx context.Context, opts ...grpc.CallOption) (PostsService_GetPostsStreamClient, error)
 	GetComment(ctx context.Context, in *GetCommentRequest, opts ...grpc.CallOption) (*GetCommentReply, error)
-	GetComments(ctx context.Context, in *GetCommentsRequest, opts ...grpc.CallOption) (*GetCommentsReply, error)
-	GetCommentsStream(ctx context.Context, opts ...grpc.CallOption) (PostsService_GetCommentsStreamClient, error)
 	GetTag(ctx context.Context, in *GetTagRequest, opts ...grpc.CallOption) (*GetTagReply, error)
 	GetTags(ctx context.Context, in *GetTagsRequest, opts ...grpc.CallOption) (*GetTagsReply, error)
 }
@@ -49,46 +45,6 @@ func (c *postsServiceClient) GetPost(ctx context.Context, in *GetPostRequest, op
 	return out, nil
 }
 
-func (c *postsServiceClient) GetPosts(ctx context.Context, in *GetPostsRequest, opts ...grpc.CallOption) (*GetPostsReply, error) {
-	out := new(GetPostsReply)
-	err := c.cc.Invoke(ctx, "/posts.PostsService/GetPosts", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *postsServiceClient) GetPostsStream(ctx context.Context, opts ...grpc.CallOption) (PostsService_GetPostsStreamClient, error) {
-	stream, err := c.cc.NewStream(ctx, &PostsService_ServiceDesc.Streams[0], "/posts.PostsService/GetPostsStream", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &postsServiceGetPostsStreamClient{stream}
-	return x, nil
-}
-
-type PostsService_GetPostsStreamClient interface {
-	Send(*GetPostRequest) error
-	Recv() (*GetPostReply, error)
-	grpc.ClientStream
-}
-
-type postsServiceGetPostsStreamClient struct {
-	grpc.ClientStream
-}
-
-func (x *postsServiceGetPostsStreamClient) Send(m *GetPostRequest) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *postsServiceGetPostsStreamClient) Recv() (*GetPostReply, error) {
-	m := new(GetPostReply)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
 func (c *postsServiceClient) GetComment(ctx context.Context, in *GetCommentRequest, opts ...grpc.CallOption) (*GetCommentReply, error) {
 	out := new(GetCommentReply)
 	err := c.cc.Invoke(ctx, "/posts.PostsService/GetComment", in, out, opts...)
@@ -96,46 +52,6 @@ func (c *postsServiceClient) GetComment(ctx context.Context, in *GetCommentReque
 		return nil, err
 	}
 	return out, nil
-}
-
-func (c *postsServiceClient) GetComments(ctx context.Context, in *GetCommentsRequest, opts ...grpc.CallOption) (*GetCommentsReply, error) {
-	out := new(GetCommentsReply)
-	err := c.cc.Invoke(ctx, "/posts.PostsService/GetComments", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *postsServiceClient) GetCommentsStream(ctx context.Context, opts ...grpc.CallOption) (PostsService_GetCommentsStreamClient, error) {
-	stream, err := c.cc.NewStream(ctx, &PostsService_ServiceDesc.Streams[1], "/posts.PostsService/GetCommentsStream", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &postsServiceGetCommentsStreamClient{stream}
-	return x, nil
-}
-
-type PostsService_GetCommentsStreamClient interface {
-	Send(*GetCommentRequest) error
-	Recv() (*GetCommentReply, error)
-	grpc.ClientStream
-}
-
-type postsServiceGetCommentsStreamClient struct {
-	grpc.ClientStream
-}
-
-func (x *postsServiceGetCommentsStreamClient) Send(m *GetCommentRequest) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *postsServiceGetCommentsStreamClient) Recv() (*GetCommentReply, error) {
-	m := new(GetCommentReply)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
 }
 
 func (c *postsServiceClient) GetTag(ctx context.Context, in *GetTagRequest, opts ...grpc.CallOption) (*GetTagReply, error) {
@@ -161,11 +77,7 @@ func (c *postsServiceClient) GetTags(ctx context.Context, in *GetTagsRequest, op
 // for forward compatibility
 type PostsServiceServer interface {
 	GetPost(context.Context, *GetPostRequest) (*GetPostReply, error)
-	GetPosts(context.Context, *GetPostsRequest) (*GetPostsReply, error)
-	GetPostsStream(PostsService_GetPostsStreamServer) error
 	GetComment(context.Context, *GetCommentRequest) (*GetCommentReply, error)
-	GetComments(context.Context, *GetCommentsRequest) (*GetCommentsReply, error)
-	GetCommentsStream(PostsService_GetCommentsStreamServer) error
 	GetTag(context.Context, *GetTagRequest) (*GetTagReply, error)
 	GetTags(context.Context, *GetTagsRequest) (*GetTagsReply, error)
 	mustEmbedUnimplementedPostsServiceServer()
@@ -178,20 +90,8 @@ type UnimplementedPostsServiceServer struct {
 func (UnimplementedPostsServiceServer) GetPost(context.Context, *GetPostRequest) (*GetPostReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPost not implemented")
 }
-func (UnimplementedPostsServiceServer) GetPosts(context.Context, *GetPostsRequest) (*GetPostsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetPosts not implemented")
-}
-func (UnimplementedPostsServiceServer) GetPostsStream(PostsService_GetPostsStreamServer) error {
-	return status.Errorf(codes.Unimplemented, "method GetPostsStream not implemented")
-}
 func (UnimplementedPostsServiceServer) GetComment(context.Context, *GetCommentRequest) (*GetCommentReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetComment not implemented")
-}
-func (UnimplementedPostsServiceServer) GetComments(context.Context, *GetCommentsRequest) (*GetCommentsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetComments not implemented")
-}
-func (UnimplementedPostsServiceServer) GetCommentsStream(PostsService_GetCommentsStreamServer) error {
-	return status.Errorf(codes.Unimplemented, "method GetCommentsStream not implemented")
 }
 func (UnimplementedPostsServiceServer) GetTag(context.Context, *GetTagRequest) (*GetTagReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTag not implemented")
@@ -230,50 +130,6 @@ func _PostsService_GetPost_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PostsService_GetPosts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetPostsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PostsServiceServer).GetPosts(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/posts.PostsService/GetPosts",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostsServiceServer).GetPosts(ctx, req.(*GetPostsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _PostsService_GetPostsStream_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(PostsServiceServer).GetPostsStream(&postsServiceGetPostsStreamServer{stream})
-}
-
-type PostsService_GetPostsStreamServer interface {
-	Send(*GetPostReply) error
-	Recv() (*GetPostRequest, error)
-	grpc.ServerStream
-}
-
-type postsServiceGetPostsStreamServer struct {
-	grpc.ServerStream
-}
-
-func (x *postsServiceGetPostsStreamServer) Send(m *GetPostReply) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *postsServiceGetPostsStreamServer) Recv() (*GetPostRequest, error) {
-	m := new(GetPostRequest)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
 func _PostsService_GetComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetCommentRequest)
 	if err := dec(in); err != nil {
@@ -290,50 +146,6 @@ func _PostsService_GetComment_Handler(srv interface{}, ctx context.Context, dec 
 		return srv.(PostsServiceServer).GetComment(ctx, req.(*GetCommentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
-}
-
-func _PostsService_GetComments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetCommentsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PostsServiceServer).GetComments(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/posts.PostsService/GetComments",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostsServiceServer).GetComments(ctx, req.(*GetCommentsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _PostsService_GetCommentsStream_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(PostsServiceServer).GetCommentsStream(&postsServiceGetCommentsStreamServer{stream})
-}
-
-type PostsService_GetCommentsStreamServer interface {
-	Send(*GetCommentReply) error
-	Recv() (*GetCommentRequest, error)
-	grpc.ServerStream
-}
-
-type postsServiceGetCommentsStreamServer struct {
-	grpc.ServerStream
-}
-
-func (x *postsServiceGetCommentsStreamServer) Send(m *GetCommentReply) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *postsServiceGetCommentsStreamServer) Recv() (*GetCommentRequest, error) {
-	m := new(GetCommentRequest)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
 }
 
 func _PostsService_GetTag_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -384,16 +196,8 @@ var PostsService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _PostsService_GetPost_Handler,
 		},
 		{
-			MethodName: "GetPosts",
-			Handler:    _PostsService_GetPosts_Handler,
-		},
-		{
 			MethodName: "GetComment",
 			Handler:    _PostsService_GetComment_Handler,
-		},
-		{
-			MethodName: "GetComments",
-			Handler:    _PostsService_GetComments_Handler,
 		},
 		{
 			MethodName: "GetTag",
@@ -404,19 +208,6 @@ var PostsService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _PostsService_GetTags_Handler,
 		},
 	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "GetPostsStream",
-			Handler:       _PostsService_GetPostsStream_Handler,
-			ServerStreams: true,
-			ClientStreams: true,
-		},
-		{
-			StreamName:    "GetCommentsStream",
-			Handler:       _PostsService_GetCommentsStream_Handler,
-			ServerStreams: true,
-			ClientStreams: true,
-		},
-	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "pkg/services/posts/posts.proto",
 }
