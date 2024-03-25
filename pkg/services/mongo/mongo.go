@@ -59,13 +59,12 @@ func (s *MongoService) Update(dbName string, collectionName string, filter any, 
 	return err
 }
 
-func (s *MongoService) GetCollectionNames(databaseName string) ([]string, error) {
+func (s *MongoService) GetCollectionNames(databaseName string, filter any) ([]string, error) {
 	db := s.client.Database(databaseName)
 
 	ctx, cancel := context.WithTimeout(context.Background(), s.QueryTimeout)
 	defer cancel()
 
-	filter := bson.D{}
 	return db.ListCollectionNames(ctx, filter)
 }
 
