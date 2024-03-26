@@ -108,18 +108,18 @@ func (s *MongoService) update(dbName string, collectionName string, filter any, 
 	return nil, nil
 }
 
-func CreateMongoService() *MongoService {
+func CreateMongoService() (*MongoService, error) {
 	connectTimeout := connectTimeout()
 	queryTimeout := queryTimeout()
 	client, err := createClient(connectTimeout)
 	if err != nil {
-		log.Error("unable to setup mongo service", err.Error())
+		return nil, err
 	}
 	return &MongoService{
 		ConnectTimeout: connectTimeout,
 		QueryTimeout:   queryTimeout,
 		client:         client,
-	}
+	}, nil
 }
 
 func createClient(connectTimeout time.Duration) (*mongo.Client, error) {
