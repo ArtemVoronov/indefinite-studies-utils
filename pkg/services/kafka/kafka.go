@@ -109,7 +109,7 @@ func (s *KafkaConsumerService) StartReadingMessages(quit <-chan struct{}, out ch
 				if err == nil {
 					out <- msg
 				} else if err.(kafka.Error).Code() != kafka.ErrTimedOut {
-					outErr <- fmt.Errorf("consumer error: %s", err)
+					outErr <- err
 				}
 			}
 		}
