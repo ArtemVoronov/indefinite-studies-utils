@@ -65,7 +65,7 @@ func CreatePostsGRPCService(serverHost string, creds *credentials.TransportCrede
 func (s *PostsGRPCService) connect() error {
 	conn, err := grpc.Dial(s.serverHost, s.dialOptions...)
 	if err != nil {
-		return fmt.Errorf("unable to connect to '%v', error: %v", s.serverHost, err)
+		return fmt.Errorf("unable to connect to '%v', error: %w", s.serverHost, err)
 	}
 	s.connection = conn
 	s.client = NewPostsServiceClient(conn)
@@ -83,7 +83,7 @@ func (s *PostsGRPCService) GetPost(postUuid string) (*GetPostResult, error) {
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return nil, fmt.Errorf("could not GetPost: %v", err)
+			return nil, fmt.Errorf("could not GetPost: %w", err)
 		}
 	}
 
@@ -92,7 +92,7 @@ func (s *PostsGRPCService) GetPost(postUuid string) (*GetPostResult, error) {
 
 	reply, err := s.client.GetPost(ctx, &GetPostRequest{Uuid: postUuid})
 	if err != nil {
-		return nil, fmt.Errorf("could not GetPost: %v", err)
+		return nil, fmt.Errorf("could not GetPost: %w", err)
 	}
 
 	result := ToGetPostResult(reply)
@@ -104,7 +104,7 @@ func (s *PostsGRPCService) GetComment(postUuid string, commentId int64) (*GetCom
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return nil, fmt.Errorf("could not GetComment: %v", err)
+			return nil, fmt.Errorf("could not GetComment: %w", err)
 		}
 	}
 
@@ -113,7 +113,7 @@ func (s *PostsGRPCService) GetComment(postUuid string, commentId int64) (*GetCom
 
 	reply, err := s.client.GetComment(ctx, &GetCommentRequest{PostUuid: postUuid, Id: commentId})
 	if err != nil {
-		return nil, fmt.Errorf("could not GetComment: %v", err)
+		return nil, fmt.Errorf("could not GetComment: %w", err)
 	}
 
 	result := ToGetCommentResult(reply)
@@ -125,7 +125,7 @@ func (s *PostsGRPCService) GetTag(id int64) (*GetTagResult, error) {
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return nil, fmt.Errorf("could not GetTag: %v", err)
+			return nil, fmt.Errorf("could not GetTag: %w", err)
 		}
 	}
 
@@ -134,7 +134,7 @@ func (s *PostsGRPCService) GetTag(id int64) (*GetTagResult, error) {
 
 	reply, err := s.client.GetTag(ctx, &GetTagRequest{Id: id})
 	if err != nil {
-		return nil, fmt.Errorf("could not GetTag: %v", err)
+		return nil, fmt.Errorf("could not GetTag: %w", err)
 	}
 
 	result := ToGetTagResult(reply)
@@ -146,7 +146,7 @@ func (s *PostsGRPCService) GetTags(offset int32, limit int32) (*GetTagsReply, er
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return nil, fmt.Errorf("could not GetTags: %v", err)
+			return nil, fmt.Errorf("could not GetTags: %w", err)
 		}
 	}
 
@@ -155,7 +155,7 @@ func (s *PostsGRPCService) GetTags(offset int32, limit int32) (*GetTagsReply, er
 
 	reply, err := s.client.GetTags(ctx, &GetTagsRequest{Offset: offset, Limit: limit})
 	if err != nil {
-		return nil, fmt.Errorf("could not GetTags: %v", err)
+		return nil, fmt.Errorf("could not GetTags: %w", err)
 	}
 	return reply, nil
 }

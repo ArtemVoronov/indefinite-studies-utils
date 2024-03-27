@@ -53,7 +53,7 @@ func CreateProfilesGRPCService(serverHost string, creds *credentials.TransportCr
 func (s *ProfilesGRPCService) connect() error {
 	conn, err := grpc.Dial(s.serverHost, s.dialOptions...)
 	if err != nil {
-		return fmt.Errorf("unable to connect to '%v', error: %v", s.serverHost, err)
+		return fmt.Errorf("unable to connect to '%v', error: %w", s.serverHost, err)
 	}
 	s.connection = conn
 	s.client = NewProfilesServiceClient(conn)
@@ -71,7 +71,7 @@ func (s *ProfilesGRPCService) ValidateCredentials(login string, password string)
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return nil, fmt.Errorf("could not ValidateCredentials: %v", err)
+			return nil, fmt.Errorf("could not ValidateCredentials: %w", err)
 		}
 	}
 
@@ -80,7 +80,7 @@ func (s *ProfilesGRPCService) ValidateCredentials(login string, password string)
 
 	reply, err := s.client.ValidateCredentials(ctx, &ValidateCredentialsRequest{Login: login, Password: password})
 	if err != nil {
-		return nil, fmt.Errorf("could not ValidateCredentials: %v", err)
+		return nil, fmt.Errorf("could not ValidateCredentials: %w", err)
 	}
 
 	result := ToCredentialsValidationResult(reply)
@@ -92,7 +92,7 @@ func (s *ProfilesGRPCService) GetUser(userUuid string) (*GetUserResult, error) {
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return nil, fmt.Errorf("could not GetUser: %v", err)
+			return nil, fmt.Errorf("could not GetUser: %w", err)
 		}
 	}
 
@@ -101,7 +101,7 @@ func (s *ProfilesGRPCService) GetUser(userUuid string) (*GetUserResult, error) {
 
 	reply, err := s.client.GetUser(ctx, &GetUserRequest{Uuid: userUuid})
 	if err != nil {
-		return nil, fmt.Errorf("could not GetUser: %v", err)
+		return nil, fmt.Errorf("could not GetUser: %w", err)
 	}
 
 	result := ToGetUserResult(reply)

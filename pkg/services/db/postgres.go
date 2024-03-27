@@ -56,7 +56,7 @@ func (s *PostgreSQLService) Tx(f SqlQueryFunc) func() (any, error) {
 		defer cancel()
 		tx, err := database.BeginTx(ctx, nil)
 		if err != nil {
-			return -1, fmt.Errorf("error at creating tx: %s", err)
+			return -1, fmt.Errorf("error at creating tx: %w", err)
 		}
 		defer tx.Rollback()
 		result, err := f(tx, ctx, cancel)
@@ -65,7 +65,7 @@ func (s *PostgreSQLService) Tx(f SqlQueryFunc) func() (any, error) {
 		}
 		err = tx.Commit()
 		if err != nil {
-			return -1, fmt.Errorf("error at commiting tx: %s", err)
+			return -1, fmt.Errorf("error at commiting tx: %w", err)
 		}
 		return result, err
 	}
@@ -79,7 +79,7 @@ func (s *PostgreSQLService) TxVoid(f SqlQueryFuncVoid) func() error {
 		defer cancel()
 		tx, err := database.BeginTx(ctx, nil)
 		if err != nil {
-			return fmt.Errorf("error at creating tx: %s", err)
+			return fmt.Errorf("error at creating tx: %w", err)
 		}
 		defer tx.Rollback()
 		err = f(tx, ctx, cancel)
@@ -88,7 +88,7 @@ func (s *PostgreSQLService) TxVoid(f SqlQueryFuncVoid) func() error {
 		}
 		err = tx.Commit()
 		if err != nil {
-			return fmt.Errorf("error at commiting tx: %s", err)
+			return fmt.Errorf("error at commiting tx: %w", err)
 		}
 		return err
 	}

@@ -6,7 +6,6 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -190,7 +189,7 @@ func LoadTLSCredentialsForServer(certPath, keyPath string) (credentials.Transpor
 }
 
 func LoadTLSCredentialsForClient(certPath string) (credentials.TransportCredentials, error) {
-	pemServerCA, err := ioutil.ReadFile(certPath)
+	pemServerCA, err := os.ReadFile(certPath)
 	if err != nil {
 		return nil, err
 	}

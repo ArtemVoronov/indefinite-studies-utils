@@ -50,7 +50,7 @@ func CreateAuthGRPCService(serverHost string, creds *credentials.TransportCreden
 func (s *AuthGRPCService) connect() error {
 	conn, err := grpc.Dial(s.serverHost, s.dialOptions...)
 	if err != nil {
-		return fmt.Errorf("unable to connect to '%v', error: %v", s.serverHost, err)
+		return fmt.Errorf("unable to connect to '%v', error: %w", s.serverHost, err)
 	}
 	s.connection = conn
 	s.client = NewAuthServiceClient(conn)
@@ -68,7 +68,7 @@ func (s *AuthGRPCService) VerifyToken(token string) (*VerificationResult, error)
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return nil, fmt.Errorf("could not verify token, error during connection: %v", err)
+			return nil, fmt.Errorf("could not verify token, error during connection: %w", err)
 		}
 	}
 
@@ -77,7 +77,7 @@ func (s *AuthGRPCService) VerifyToken(token string) (*VerificationResult, error)
 
 	reply, err := s.client.VerifyToken(ctx, &VerifyTokenRequest{Token: token})
 	if err != nil {
-		return nil, fmt.Errorf("could not get verify token; token: '%v'; error: %v", err, token)
+		return nil, fmt.Errorf("could not get verify token; token: '%v'; error: %w", token, err)
 	}
 
 	result := ToVerificationResult(reply)
@@ -89,7 +89,7 @@ func (s *AuthGRPCService) GetTokenClaims(token string) (*TokenClaimsResult, erro
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return nil, fmt.Errorf("could not get token claims; error during connection: %v", err)
+			return nil, fmt.Errorf("could not get token claims; error during connection: %w", err)
 		}
 	}
 
@@ -98,7 +98,7 @@ func (s *AuthGRPCService) GetTokenClaims(token string) (*TokenClaimsResult, erro
 
 	reply, err := s.client.GetTokenClaims(ctx, &GetTokenClaimsRequest{Token: token})
 	if err != nil {
-		return nil, fmt.Errorf("could not get token claims; token: '%v'; error: %v. ", err, token)
+		return nil, fmt.Errorf("could not get token claims; token: '%v'; error: %w", token, err)
 	}
 
 	result := ToTokenClaimsResult(reply)

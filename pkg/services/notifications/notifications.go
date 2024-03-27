@@ -36,7 +36,7 @@ func CreateNotificationsGRPCService(serverHost string, creds *credentials.Transp
 func (s *NotificationsGRPCService) connect() error {
 	conn, err := grpc.Dial(s.serverHost, s.dialOptions...)
 	if err != nil {
-		return fmt.Errorf("unable to connect to '%v', error: %v", s.serverHost, err)
+		return fmt.Errorf("unable to connect to '%v', error: %w", s.serverHost, err)
 	}
 	s.connection = conn
 	s.client = NewNotificationsServiceClient(conn)
@@ -54,7 +54,7 @@ func (s *NotificationsGRPCService) SendEmail(sender string, recepient string, su
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return fmt.Errorf("could not SendEmail: %v", err)
+			return fmt.Errorf("could not SendEmail: %w", err)
 		}
 	}
 
@@ -63,7 +63,7 @@ func (s *NotificationsGRPCService) SendEmail(sender string, recepient string, su
 
 	_, err := s.client.SendEmail(ctx, &SendEmailRequest{Sender: sender, Recepient: recepient, Subject: subject, Body: body})
 	if err != nil {
-		return fmt.Errorf("could not SendEmail: %v", err)
+		return fmt.Errorf("could not SendEmail: %w", err)
 	}
 
 	return nil

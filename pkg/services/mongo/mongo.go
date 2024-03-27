@@ -39,12 +39,12 @@ func (s *MongoService) Insert(dbName string, collectionName string, document int
 
 	insertResult, err := collection.InsertOne(ctx, document)
 	if err != nil {
-		return nil, fmt.Errorf("unable to insert document '%v'. Error: %v", document, err)
+		return nil, fmt.Errorf("unable to insert document '%v'. Error: %w", document, err)
 	}
 
 	result, ok := insertResult.InsertedID.(primitive.ObjectID)
 	if !ok {
-		return nil, fmt.Errorf("unable to insert document: %s", api.ERROR_ASSERT_RESULT_TYPE)
+		return nil, fmt.Errorf("unable to insert document: %v", api.ERROR_ASSERT_RESULT_TYPE)
 	}
 
 	return &result, nil
@@ -76,12 +76,12 @@ func (s *MongoService) Delete(dbName string, collectionName string, filter bson.
 
 	_, err := collection.DeleteOne(ctx, filter)
 	if err != nil {
-		return fmt.Errorf("unable to delete document. filter: '%#v'. Error: %v", filter, err)
+		return fmt.Errorf("unable to delete document. filter: '%v'. Error: %w", filter, err)
 	}
 	return err
 }
 
-func (s *MongoService) update(dbName string, collectionName string, filter any, update interface{}, isUpsert bool) (*primitive.ObjectID, error) {
+func (s *MongoService) update(dbName string, collectionName string, filter any, update any, isUpsert bool) (*primitive.ObjectID, error) {
 	collection := s.GetCollection(dbName, collectionName)
 
 	ctx, cancel := context.WithTimeout(context.Background(), s.QueryTimeout)
@@ -90,7 +90,7 @@ func (s *MongoService) update(dbName string, collectionName string, filter any, 
 	opts := options.Update().SetUpsert(isUpsert)
 	result, err := collection.UpdateOne(ctx, filter, update, opts)
 	if err != nil {
-		return nil, fmt.Errorf("unable to update document. Filter: '%#v'. Update: '%v'. Error: %v", filter, update, err)
+		return nil, fmt.Errorf("unable to update document. Filter: '%v'. Update: '%v'. Error: %w", filter, update, err)
 	}
 
 	if result.MatchedCount != 0 {
@@ -100,7 +100,7 @@ func (s *MongoService) update(dbName string, collectionName string, filter any, 
 	if isUpsert && result.UpsertedCount != 0 {
 		id, ok := result.UpsertedID.(primitive.ObjectID)
 		if !ok {
-			return nil, fmt.Errorf("unable to update document: %s", api.ERROR_ASSERT_RESULT_TYPE)
+			return nil, fmt.Errorf("unable to update document: %v", api.ERROR_ASSERT_RESULT_TYPE)
 		}
 		return &id, nil
 	}
@@ -130,7 +130,7 @@ func createClient(connectTimeout time.Duration) (*mongo.Client, error) {
 
 	result, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoConnectionURL()))
 	if err != nil {
-		return result, fmt.Errorf("unable to create mongo client: %v", err)
+		return result, fmt.Errorf("unable to create mongo client: %w", err)
 	}
 
 	return result, nil
@@ -181,14 +181,14 @@ func (s *MongoService) Tx(f QueryFuncVoid) func() error {
 	return func() error {
 		session, err := s.client.StartSession()
 		if err != nil {
-			return fmt.Errorf("unable to start session: %v", err)
+			return fmt.Errorf("unable to start session: %w", err)
 		}
 		defer session.EndSession(ctx)
 
 		err = mongo.WithSession(ctx, session, func(sc mongo.SessionContext) error {
 			err = session.StartTransaction()
 			if err != nil {
-				return fmt.Errorf("unable to start tx: %v", err)
+				return fmt.Errorf("unable to start tx: %w", err)
 			}
 			defer session.AbortTransaction(sc)
 
@@ -199,7 +199,7 @@ func (s *MongoService) Tx(f QueryFuncVoid) func() error {
 
 			err = session.CommitTransaction(sc)
 			if err != nil {
-				return fmt.Errorf("unable to commit tx: %v", err)
+				return fmt.Errorf("unable to commit tx: %w", err)
 			}
 			return nil
 		})

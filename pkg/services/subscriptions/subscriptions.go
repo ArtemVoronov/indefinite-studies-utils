@@ -37,7 +37,7 @@ func CreateSubscriptionsGRPCService(serverHost string, creds *credentials.Transp
 func (s *SubscriptionsGRPCService) connect() error {
 	conn, err := grpc.Dial(s.serverHost, s.dialOptions...)
 	if err != nil {
-		return fmt.Errorf("unable to connect to '%v', error: %v", s.serverHost, err)
+		return fmt.Errorf("unable to connect to '%v', error: %w", s.serverHost, err)
 	}
 	s.connection = conn
 	s.client = NewSubscriptionsServiceClient(conn)
@@ -55,7 +55,7 @@ func (s *SubscriptionsGRPCService) PutEvent(eventType string, eventBody string) 
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return fmt.Errorf("could not PutEvent: %v", err)
+			return fmt.Errorf("could not PutEvent: %w", err)
 		}
 	}
 
@@ -64,7 +64,7 @@ func (s *SubscriptionsGRPCService) PutEvent(eventType string, eventBody string) 
 
 	_, err := s.client.PutEvent(ctx, &PutEventRequest{EventType: eventType, EventBody: eventBody})
 	if err != nil {
-		return fmt.Errorf("could not PutEvent: %v", err)
+		return fmt.Errorf("could not PutEvent: %w", err)
 	}
 
 	return nil
@@ -74,7 +74,7 @@ func (s *SubscriptionsGRPCService) PutSendEmailEvent(in kafka.SendEmailEvent) er
 	if s.connection == nil {
 		err := s.connect()
 		if err != nil {
-			return fmt.Errorf("could not PutSendEmailEvent: %v", err)
+			return fmt.Errorf("could not PutSendEmailEvent: %w", err)
 		}
 	}
 
@@ -88,7 +88,7 @@ func (s *SubscriptionsGRPCService) PutSendEmailEvent(in kafka.SendEmailEvent) er
 		Body:      in.Body,
 	})
 	if err != nil {
-		return fmt.Errorf("could not PutSendEmailEvent: %v", err)
+		return fmt.Errorf("could not PutSendEmailEvent: %w", err)
 	}
 
 	return nil
