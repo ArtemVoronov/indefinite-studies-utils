@@ -50,7 +50,7 @@ func (s *MongoService) Insert(dbName string, collectionName string, document int
 	return &result, nil
 }
 
-func (s *MongoService) Upsert(dbName string, collectionName string, filter any, update interface{}) (*primitive.ObjectID, error) {
+func (s *MongoService) Upsert(dbName string, collectionName string, filter any, update interface{}) (any, error) {
 	return s.update(dbName, collectionName, filter, update, true)
 }
 
@@ -81,7 +81,7 @@ func (s *MongoService) Delete(dbName string, collectionName string, filter bson.
 	return err
 }
 
-func (s *MongoService) update(dbName string, collectionName string, filter any, update any, isUpsert bool) (*primitive.ObjectID, error) {
+func (s *MongoService) update(dbName string, collectionName string, filter any, update any, isUpsert bool) (any, error) {
 	collection := s.GetCollection(dbName, collectionName)
 
 	ctx, cancel := context.WithTimeout(context.Background(), s.QueryTimeout)
@@ -98,11 +98,7 @@ func (s *MongoService) update(dbName string, collectionName string, filter any, 
 	}
 
 	if isUpsert && result.UpsertedCount != 0 {
-		id, ok := result.UpsertedID.(primitive.ObjectID)
-		if !ok {
-			return nil, fmt.Errorf("unable to update document: %v", api.ERROR_ASSERT_RESULT_TYPE)
-		}
-		return &id, nil
+		return result.UpsertedID, nil
 	}
 
 	return nil, nil
